@@ -8,7 +8,7 @@ Single Point Positioning (SPP) solutions by least squares adjustment using pseud
 # How to install?
 Download the package and change directory of your terminal to gnsspy-master folder. Then, simply type
 ```
-pip setup.py install
+python setup.py install
 ```
 Or you can directly install package from GitHub via
 ```
