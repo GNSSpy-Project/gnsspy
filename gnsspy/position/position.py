@@ -63,7 +63,7 @@ def spp(station, orbit, system="G", cut_off=7.0):
             try:
                 linearEquationSolution = _np.linalg.lstsq(coeffMatrix,lMatrix,rcond=None)
                 xMatrix = linearEquationSolution[0]
-                pos = [approx_position[0] + xMatrix[0], approx_position[1] + xMatrix[1], approx_position[2] + xMatrix[2], receiver_clock + xMatrix[3]]
+                pos = [approx_position[0] + xMatrix[0], approx_position[1] + xMatrix[1], approx_position[2] + xMatrix[2], receiver_clock + xMatrix[3] / _CLIGHT]
                 approx_position[0], approx_position[1] , approx_position[2], receiver_clock = pos[0], pos[1], pos[2], pos[3]
             except:
                 print("Cannot solve normal equations for epoch", epoch_start,"| Skipping...")
