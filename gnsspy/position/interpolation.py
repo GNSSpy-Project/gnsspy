@@ -65,7 +65,7 @@ def sp3_interp(epoch, interval=30, poly_degree=16, sp3_product="gfz", clock_prod
         for svIndex,sv in enumerate(svList):
             epoch_number = len(sp3_temp.loc[sv])
             if epoch_number <= poly_degree:
-                print("Warning: Not enough epochs to predict for satellite",sv,"| Epoch No:",epoch_number, " - Polynomial Degree:",poly_degree)
+                print("Warning: Not enough epochs to predict for satellite",sv,"| Epoch Count:",epoch_number, " - Polynomial Degree:",poly_degree)
                 epoch_interp_List[:,:,svIndex] = _np.full(shape=(int(10800/interval),6),fill_value=None)
                 continue
             if epoch_number != 17:
