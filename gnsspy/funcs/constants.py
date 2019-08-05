@@ -8,7 +8,7 @@ _OMEGA = 7.2921151467e-05 # angular rotation of Earth [unit:rad/s]
 _SYSTEM_NAME = {'G' : 'GPS',
                 'R' : 'GLONASS',
                 'E' : 'GALILEO',
-                'C' : 'COMBASS',
+                'C' : 'COMPASS',
                 'J' : 'QZSS',
                 'I' : 'IRNSS',
                 'S' : 'SBAS'}
