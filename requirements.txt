@@ -1,5 +1,6 @@
 pandas
 numpy
 pyunpack
+patool
 matplotlib
 
