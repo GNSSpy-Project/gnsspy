@@ -344,6 +344,7 @@ def read_obsFile_v2(observationFile):
     else:
         interval = epochList[1] - epochList[0]
         interval = interval.seconds
+    f.close() # close the file
     #---------------------------------------------------------------------------------------
     finish = time.time()
     print("Observation file ", observationFile," is read in", "{0:.2f}".format(finish-start), "seconds.")
@@ -553,6 +554,7 @@ def read_obsFile_v3(obsFileName):
     else:
         interval = epochList[1] - epochList[0]
         interval = interval.seconds
+    f.close() # close the file
     # =============================================================================
     finish = time.time()     # Time of finish
     print("Observation file ", obsFileName," is read in", "{0:.2f}".format(finish-start), "seconds.")
@@ -625,6 +627,7 @@ def read_sp3File(sp3file):
     position.index.name = 'SV'
     position.set_index('Epoch', append=True, inplace=True)
     position = position.reorder_levels(["Epoch","SV"])
+    f.close() # close the file
     # ------------------------------------------------------------------
     end = time.time()
     print('{}'.format(sp3file), 'file is read in', '{0:.2f}'.format(end-start), 'seconds')
@@ -690,6 +693,7 @@ def read_clockFile(clkFile):
         SVtime.append(float(timelist[i][9]))
     SVTimelist = pd.DataFrame(list(zip(Epochlist, SVtime)), index = Sat,
                 columns=['Epoch','DeltaTSV'])
+    f.close() # close the file
     end = time.time()
     print('{}'.format(clkFile), 'file is read in', '{0:.2f}'.format(end-start), 'seconds')
     return SVTimelist
@@ -736,6 +740,7 @@ def read_ionFile(IonFile):
             del obsLines[0:6]
         del obsLines[0]
         #---------------------------------------------------------------------------------------
+    f.close() # close the file
     finish = time.time()
     print("Ionosphere file ", IonFile," is read in", "{0:.2f}".format(finish-start), "seconds.")
     return tecuList
