@@ -47,7 +47,7 @@ def spp(station, orbit, system="G", cut_off=7.0):
     position_list = []
     while True:
         epoch_step = epoch_start + epoch_interval
-        gnss_temp = gnss.loc[(slice(epoch_start,epoch_step))].copy()
+        gnss_temp = gnss.xs((slice(epoch_start,epoch_step))).copy()
         for iter in range(6):
             distance = _distance_euclidean(approx_position[0],approx_position[1],approx_position[2], gnss_temp.X_Reception, gnss_temp.Y_Reception, gnss_temp.Z_Reception)
             gnss_temp["Distance"] = distance + _sagnac(approx_position[0],approx_position[1],approx_position[2], gnss_temp.X_Reception, gnss_temp.Y_Reception, gnss_temp.Z_Reception)
