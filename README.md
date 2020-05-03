@@ -41,7 +41,7 @@ station.receiver_clock
 # Receiver Type
 station.receiver_type
 # RINEX version
-staton.version
+station.version
 # RINEX filename
 station.filename
 ```
