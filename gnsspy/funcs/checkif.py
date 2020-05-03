@@ -1,7 +1,7 @@
 # ===========================================================
 # ========================= imports =========================
 import os
-from pyunpack import Archive
+from  patoolib import extract_archive
 import http.client
 from gnsspy import download
 from gnsspy.doc.IGS import IGS, is_IGS
@@ -48,7 +48,8 @@ def isexist(fileName):
                     print(fileName + ".Z does not exist in working directory | Downloading...")
                     fileEpoch = doy2date(fileName)
                     download.get_rinex([fileName[:4]], fileEpoch, Datetime = True)
-                    Archive(fileName + ".Z").extractall(_CWD)
+                    print(" | Download completed for", fileName + ".Z", " | Extracting...")
+                    extract_archive(fileName + ".Z", outdir=_CWD)
                 else:
                     raise Warning(fileName,"does not exist in directory and cannot be found in IGS Station list!")
             elif extension.lower() == "rnx":
@@ -57,7 +58,8 @@ def isexist(fileName):
                     fileName = fileName.split(".")[0] + ".crx"
                     fileEpoch = doy2date(fileName)
                     download.get_rinex3([fileName[:4]], fileEpoch, Datetime = True)
-                    Archive(fileName + ".gz").extractall(_CWD)
+                    print(" | Download completed for", fileName + ".gz", " | Extracting...")
+                    extract_archive(fileName + ".gz", outdir=_CWD)
                     crx2rnx(fileName)
                 else:
                     raise Warning(fileName,"does not exist in directory and cannot be found in IGS Station list!")
@@ -66,7 +68,7 @@ def isexist(fileName):
                     print(fileName + ".gz does not exist in working directory | Downloading...")
                     fileEpoch = doy2date(fileName)
                     download.get_rinex3([fileName[:4]], fileEpoch, Datetime = True)
-                    Archive(fileName + ".gz").extractall(_CWD)
+                    extract_archive(fileName + ".gz", outdir=_CWD)
                     crx2rnx(fileName)
                 else:
                     raise Warning(fileName,"does not exist in directory and cannot be found in IGS Station list!")
@@ -75,26 +77,26 @@ def isexist(fileName):
                     print(fileName + ".Z does not exist in working directory | Downloading...")
                     fileEpoch = doy2date(fileName)
                     download.get_navigation([fileName[:4]], fileEpoch, Datetime = True)
-                    Archive(fileName + ".Z").extractall(_CWD)
+                    extract_archive(fileName + ".Z", outdir=_CWD)
             elif extension.lower() in {"clk","clk_05s"}:
                 download.get_clock(fileName)
-                Archive(fileName + ".Z").extractall(_CWD)
+                extract_archive(fileName + ".Z", outdir=_CWD)
             elif extension.lower() == "sp3":
                 download.get_sp3(fileName)
-                Archive(fileName + ".Z").extractall(_CWD)
+                extract_archive(fileName + ".Z", outdir=_CWD)
             elif extension[-1].lower() == "i":
                 download.get_ionosphere(fileName)
-                Archive(fileName + ".Z").extractall(_CWD)
+                extract_archive(fileName + ".Z", outdir=_CWD)
             else:
                 raise Warning("Unknown file extension:",extension.lower())
         elif (os.path.exists(fileName + ".Z") == True) and (fileName.endswith(".Z")==True):
             print(fileName + " exists in working directory | Extracting...")
-            Archive(fileName).extractall(_CWD)
+            extract_archive(fileName, outdir=_CWD)
         else:
             print(fileName + ".Z exists in working directory | Extracting...")
-            Archive(fileName + ".Z").extractall(_CWD)
+            extract_archive(fileName + ".Z", outdir=_CWD)
     elif (os.path.exists(fileName) == True) and (fileName.endswith(".Z")==True):
         print(fileName + " exists in working directory | Extracting...")
-        Archive(fileName).extractall(_CWD)
+        extract_archive(fileName, outdir=_CWD)
     else:
         print(fileName + " exist in working directory | Reading...")
