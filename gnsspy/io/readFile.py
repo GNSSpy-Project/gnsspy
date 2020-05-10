@@ -11,7 +11,6 @@ import time
 import datetime
 import numpy as np
 import pandas as pd
-from pyunpack import Archive
 from gnsspy.download import get_rinex, get_ionosphere
 from gnsspy.funcs.checkif import (isfloat, isint, isexist)
 from gnsspy.funcs.date import doy2date
