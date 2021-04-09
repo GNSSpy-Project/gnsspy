@@ -14,7 +14,7 @@ except ImportError:
 
 def load_requirements(fname):
     reqs = parse_requirements(fname, session="test")
-    return [str(ir.req) for ir in reqs]
+    return [str(ir.requirement) for ir in reqs]
 
 def get_property(prop, project):
     result = re.search(r'{}\s*=\s*[\'"]([^\'"]*)[\'"]'.format(prop), open(project + '/__init__.py').read())
