@@ -58,7 +58,7 @@ spp_result = gp.spp(station, orbit, system="G", cut_off=7.0)
 ```
 
 # Notes
-crx2rnx function is not pure python implimentation and depends on 
+crx2rnx function is not pure python implementation and depends on 
 RNXCMP software for compression/restoration of RINEX observation files 
 developed by Y. Hatanaka of GSI.
 
