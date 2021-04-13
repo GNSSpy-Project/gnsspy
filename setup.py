@@ -23,6 +23,7 @@ setup(
     "matplotlib",
     "pyunpack",
     "hatanaka",
+    "tqdm",
   ],
   include_package_data = True,
   package_data = {"gnsspy.doc": ["IGSList.txt"]},

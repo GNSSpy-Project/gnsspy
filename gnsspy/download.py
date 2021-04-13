@@ -12,9 +12,12 @@ from dateutil.relativedelta import relativedelta
 from gnsspy.funcs.funcs import (check_internet, obsFileName,
                                 navFileName, nav3FileName, 
                                 obs3FileName, datetime2doy)
+from tqdm import tqdm
 # ===========================================================
 
 __all__ = ["get_rinex", "get_rinex3", "get_navigation", "get_clock", "get_sp3", "get_ionosphere"]
+
+server_root = 'ftp://igs.ensg.ign.fr/pub/igs'
 
 def get_rinex(stationList, date_start, date_finish=None, period='day', Datetime=False, directory=os.getcwd()):
     """
@@ -46,8 +49,7 @@ def get_rinex(stationList, date_start, date_finish=None, period='day', Datetime=
             date = dateList[-1] + timedelta
             dateList.append(date)
 
-    ftpserver  = 'ftp://cddis.gsfc.nasa.gov'
-    obsFileDir = 'gnss/data/daily' # observation file directory in ftp server
+    obsFileDir = 'data/daily' # observation file directory in ftp server
     
     for stationName in stationList:
         for date in dateList:
@@ -63,7 +65,7 @@ def get_rinex(stationList, date_start, date_finish=None, period='day', Datetime=
                     Archive(fileName).extractall(os.getcwd())
                     continue
             file_topath = os.path.join(directory, fileName)
-            fileDir = [ftpserver, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'o', fileName] # file directory
+            fileDir = [server_root, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'o', fileName] # file directory
             ftp = '/'.join(fileDir)
             # Download the file
             try:
@@ -105,8 +107,7 @@ def get_navigation(stationList, date_start, date_finish=None, period='day', Date
             date = dateList[-1] + timedelta
             dateList.append(date)
 
-    ftpserver  = 'ftp://cddis.gsfc.nasa.gov'
-    obsFileDir = 'gnss/data/daily'
+    obsFileDir = 'data/daily'
     
     for stationName in stationList:
         for date in dateList:
@@ -123,7 +124,7 @@ def get_navigation(stationList, date_start, date_finish=None, period='day', Date
                         Archive(fileName).extractall(os.getcwd())
                         continue
                 file_topath = os.path.join(directory, fileName)
-                fileDir = [ftpserver, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'p', fileName]
+                fileDir = [server_root, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'p', fileName]
                 ftp = '/'.join(fileDir)
                 try:
                     print('Downloading:', fileName, end= '')
@@ -144,7 +145,7 @@ def get_navigation(stationList, date_start, date_finish=None, period='day', Date
                                 Archive(igsFileName).extractall(os.getcwd())
                                 continue
                         file_topath = os.path.join(directory, igsFileName)
-                        fileDir = [ftpserver, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'p', igsFileName]
+                        fileDir = [server_root, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'p', igsFileName]
                         ftp = '/'.join(fileDir) 
                         print('Downloading:', igsFileName, end= '')
                         url.urlretrieve(ftp, file_topath)
@@ -165,7 +166,7 @@ def get_navigation(stationList, date_start, date_finish=None, period='day', Date
                         Archive(fileName).extractall(os.getcwd())
                         continue
                 file_topath = os.path.join(directory, fileName)
-                fileDir = [ftpserver, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'n', fileName]
+                fileDir = [server_root, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'n', fileName]
                 ftp = '/'.join(fileDir) # FTP link of file
                 try:
                     print('Downloading:', fileName, end= '')
@@ -185,7 +186,7 @@ def get_navigation(stationList, date_start, date_finish=None, period='day', Date
                                 Archive(igsFileName).extractall(os.getcwd())
                                 continue
                         file_topath = os.path.join(directory, igsFileName)
-                        fileDir = [ftpserver, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'n', igsFileName]
+                        fileDir = [server_root, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'n', igsFileName]
                         ftp = '/'.join(fileDir)
                         print('Downloading:', igsFileName, end= '')
                         url.urlretrieve(ftp, file_topath)
@@ -225,8 +226,7 @@ def get_rinex3(stationList, date_start, date_finish=None, period='day', Datetime
             date = dateList[-1] + timedelta
             dateList.append(date)
 
-    ftpserver  = 'ftp://cddis.gsfc.nasa.gov'
-    obsFileDir = 'gnss/data/daily' # observation file directory in ftp server
+    obsFileDir = 'data/daily' # observation file directory in ftp server
     
     for stationName in stationList:
         for date in dateList:
@@ -242,11 +242,12 @@ def get_rinex3(stationList, date_start, date_finish=None, period='day', Datetime
                     Archive(fileName).extractall(os.getcwd())
                     continue
             file_topath = os.path.join(directory, fileName)
-            fileDir = [ftpserver, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'd', fileName] 
+            fileDir = [server_root, obsFileDir, str(date.year), doy, str(date.year)[-2:] + 'd', fileName] 
             ftp = '/'.join(fileDir) 
             try:
                 print('Downloading:', fileName, end= '')
-                url.urlretrieve(ftp, file_topath)
+                with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=fileName) as t:
+                    url.urlretrieve(ftp, file_topath, reporthook=t.update_to)
                 print(" | Download completed for", fileName, " | Extracting...")
                 Archive(fileName).extractall(os.getcwd())
             except:
@@ -270,17 +271,17 @@ def get_sp3(sp3file, directory=os.getcwd()):
     if internet == False:
         raise Warning('No internet connection! | Cannot download orbit file')
     
-    ftpserver  = 'ftp://cddis.gsfc.nasa.gov'
-    sp3FileDir = 'gnss/products'
+    sp3FileDir = 'products'
     if sp3file.startswith("wum"): 
         sp3FileDir += '/mgex'
     file_topath = os.path.join(directory, fileName)
-    fileDir = [ftpserver, sp3FileDir, fileName[3:-7], fileName]
+    fileDir = [server_root, sp3FileDir, fileName[3:-7], fileName]
     ftp = '/'.join(fileDir) # FTP link of file
 
     try:
         print('Downloading:', fileName, end = '')
-        url.urlretrieve(ftp, file_topath)
+        with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=fileName) as t:
+            url.urlretrieve(ftp, file_topath, reporthook=t.update_to)
         print(' | Download completed for', fileName)
         Archive(fileName).extractall(os.getcwd())
     except:
@@ -303,29 +304,30 @@ def get_clock(clockFile, directory=os.getcwd()):
     if internet == False:
         raise Warning('No internet connection! | Cannot download clock file')
     
-    ftpserver  = 'ftp://cddis.gsfc.nasa.gov'
-    clockFileDir = 'gnss/products' 
+    clockFileDir = 'products' 
     if clockFile.startswith("wum"): 
         clockFileDir += '/mgex'
     file_topath = os.path.join(directory, fileName)
-    fileDir = [ftpserver, clockFileDir, fileName[3:7], fileName] 
+    fileDir = [server_root, clockFileDir, fileName[3:7], fileName] 
     ftp = '/'.join(fileDir) 
 
     try:
         print('Downloading:', fileName, end = '')
-        url.urlretrieve(ftp, file_topath)
+        with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=fileName) as t:
+            url.urlretrieve(ftp, file_topath, reporthook=t.update_to)
         print(' | Download completed for', fileName)
         return fileName[:-2]
     except:
         print("Requested file", fileName, "cannot be not found in ftp server")
         fileName = "gfz" + clockFile[3:] + ".Z"
         file_topath = os.path.join(directory, fileName)
-        fileDir = [ftpserver, clockFileDir, fileName[3:7], fileName] 
+        fileDir = [server_root, clockFileDir, fileName[3:7], fileName] 
         ftp = '/'.join(fileDir)
         try:
             print("Looking for GFZ clock file in ftp server...")
             print('Downloading:', fileName, end = '')
-            url.urlretrieve(ftp, file_topath)
+            with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=fileName) as t:
+                url.urlretrieve(ftp, file_topath, reporthook=t.update_to)
             print(' | Download completed for', fileName)
             return fileName[:-2]
         except:
@@ -349,28 +351,36 @@ def get_ionosphere(ionFile, directory=os.getcwd()):
     elif year <= 79:
         year += 2000
     # FTP download
-    ftpserver  = 'ftp://cddis.gsfc.nasa.gov'
-    ionFileDir = 'gnss/products/ionex'
+    ionFileDir = 'products/ionex'
     file_topath = os.path.join(directory, fileName)
-    fileDir = [ftpserver, ionFileDir, str(year), fileName[4:7], fileName] 
+    fileDir = [server_root, ionFileDir, str(year), fileName[4:7], fileName] 
     ftp = '/'.join(fileDir)
 
     try:
         print('Downloading:', fileName, end = '')
-        url.urlretrieve(ftp, file_topath)
+        with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=fileName) as t:
+            url.urlretrieve(ftp, file_topath, reporthook=t.update_to)
         print(' | Download completed for', fileName)
         return fileName[:-2]
     except:
         print("Requested file", fileName, "cannot be not found in FTP server")
         fileName = "igs" + ionFile[3:] + ".Z"
         file_topath = os.path.join(directory, fileName)
-        fileDir = [ftpserver, ionFileDir, fileName[3:7], fileName]
+        fileDir = [server_root, ionFileDir, fileName[3:7], fileName]
         ftp = '/'.join(fileDir)
         try:
             print("Looking for ionosphere file in FTP server...")
             print('Downloading:', fileName, end = '')
-            url.urlretrieve(ftp, file_topath)
+            with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=fileName) as t:
+                url.urlretrieve(ftp, file_topath, reporthook=t.update_to)
             print(' | Download completed for', fileName)
             return fileName[:-2]
         except:
             raise Warning("Requested file", fileName, "cannot be not found in FTP server | Exiting")
+
+
+class TqdmUpTo(tqdm):
+    def update_to(self, b=1, bsize=1, tsize=None):
+        if tsize is not None:
+            self.total = tsize
+        return self.update(b * bsize - self.n)
