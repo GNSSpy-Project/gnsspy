@@ -22,7 +22,7 @@ SOFTWARE.
 
 from gnsspy.io.readFile import (read_navFile, read_obsFile, read_sp3File,
                                 read_clockFile, read_ionFile)
-from gnsspy.io.manipulate import (rinex_merge, crx2rnx)
+from gnsspy.io.manipulate import (rinex_merge)
 from gnsspy.position.atmosphere import (tropospheric_delay)
 from gnsspy.position.interpolation import (sp3_interp, ionosphere_interp)
 from gnsspy.position.position import (spp, multipath)

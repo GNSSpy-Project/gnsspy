@@ -61,7 +61,7 @@ def sp3_interp(epoch, interval=30, poly_degree=16, sp3_product="gfz", clock_prod
     while True:
         sp3_temp = sp3.loc[(slice(epoch_start,epoch_stop))].copy()
         sp3_temp = sp3_temp.reorder_levels(["SV","Epoch"])
-        epoch_interp_List = _np.zeros(shape=(360,6,len(svList)))
+        epoch_interp_List = _np.zeros(shape=(int(10800/interval),6,len(svList)))
         for svIndex,sv in enumerate(svList):
             epoch_number = len(sp3_temp.loc[sv])
             if epoch_number <= poly_degree:
@@ -82,7 +82,7 @@ def sp3_interp(epoch, interval=30, poly_degree=16, sp3_product="gfz", clock_prod
             z_interp = coord_interp(fitZ, interval) * 1000 # km to m
             z_velocity = _np.array([(z_interp[i+1]-z_interp[i])/interval if (i+1)<len(z_interp) else 0 for i in range(len(z_interp))])
             sv_interp = _np.vstack((x_interp[:-1], y_interp[:-1], z_interp[:-1], x_velocity[:-1], y_velocity[:-1], z_velocity[:-1])).transpose()
-            epoch_interp_List[:,:,svIndex] = sv_interp     
+            epoch_interp_List[:,:,svIndex] = sv_interp
             fitTime = _np.linspace(0, deltaT.seconds*16 , 17) # restore original fitTime in case it has changed!
         interp_coord.loc[(slice(epoch_start+timedelta(minutes=30),epoch_stop-timedelta(minutes=30,seconds=1))), ('X', 'Y', 'Z', 'Vx', 'Vy', 'Vz')] = epoch_interp_List.transpose(1,0,2).reshape(6,-1).transpose()
         epoch_start += epoch_step
