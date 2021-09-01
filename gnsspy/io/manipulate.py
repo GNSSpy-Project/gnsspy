@@ -63,12 +63,3 @@ def rinex_merge(station, doy, year, directory = os.getcwd()):
                             header = False
                     else:
                         rinexMerged.write(line)
-
-def crx2rnx(rinexFile):
-    """ Converts Hatanaka format to RINEX format """
-    path = os.path.dirname(os.path.abspath(__file__))
-    if sys.platform=="linux" or sys.platform=="darwin":
-        subprocess.call([_FILEPATH+"/CRX2RNX",rinexFile], stdin = sys.stdin)
-    elif sys.platform=="windows":
-        subprocess.call([_FILEPATH+"/crx2rnx.exe",rinexFile], stdin = sys.stdin)
-        
