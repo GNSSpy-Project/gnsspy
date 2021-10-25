@@ -5,6 +5,7 @@ To cite GNSSpy:
 
 Işık, M. S., Özbey, V., Erol, S., & Tari, E. (2021, July). GNSSpy: Python Toolkit for GNSS Data. In 2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS (pp. 8550-8553). IEEE.
 
+```
 @inproceedings{isik_et_al2021gnsspy,
   title={GNSSpy: Python Toolkit for GNSS Data},
   author={I{\c{s}}ik, Mustafa Serkan and {\"O}zbey, Volkan and Erol, Serdar and Tari, Ergin},
@@ -13,6 +14,7 @@ Işık, M. S., Özbey, V., Erol, S., & Tari, E. (2021, July). GNSSpy: Python Too
   year={2021},
   organization={IEEE}
 }
+```
 
 # What is GNSSpy? 
 GNSSpy is a free and open source library for handling multi GNSS and different versions (2.X and 3.X) of RINEX files. It provides
