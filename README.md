@@ -3,7 +3,7 @@ Python Toolkit for GNSS Data developed by Mustafa Serkan Isik (isikm@itu.edu.tr)
 
 To cite GNSSpy:
 
-Işık, M. S., Özbey, V., Erol, S., & Tari, E. (2021, July). GNSSpy: Python Toolkit for GNSS Data. In 2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS (pp. 8550-8553). IEEE.
+Işık, M. S., Özbey, V., Erol, S., & Tari, E. (2021, July). GNSSpy: Python Toolkit for GNSS Data. In 2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS (pp. 8550-8553). IEEE. DOI: https://doi.org/10.1109/IGARSS47720.2021.9553880.
 
 ```
 @inproceedings{isik_et_al2021gnsspy,
