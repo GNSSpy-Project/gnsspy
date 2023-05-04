@@ -1,6 +1,21 @@
 # GNSSpy
 Python Toolkit for GNSS Data developed by Mustafa Serkan Isik (isikm@itu.edu.tr) and Volkan Ozbey (ozbeyv@itu.edu.tr). This project is still a work in progress. Send us your feedback if possible...
 
+To cite GNSSpy:
+
+Işık, M. S., Özbey, V., Erol, S., & Tari, E. (2021, July). GNSSpy: Python Toolkit for GNSS Data. In 2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS (pp. 8550-8553). IEEE. DOI: https://doi.org/10.1109/IGARSS47720.2021.9553880.
+
+```
+@inproceedings{isik_et_al2021gnsspy,
+  title={GNSSpy: Python Toolkit for GNSS Data},
+  author={I{\c{s}}ik, Mustafa Serkan and {\"O}zbey, Volkan and Erol, Serdar and Tari, Ergin},
+  booktitle={2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS},
+  pages={8550--8553},
+  year={2021},
+  organization={IEEE}
+}
+```
+
 # What is GNSSpy? 
 GNSSpy is a free and open source library for handling multi GNSS and different versions (2.X and 3.X) of RINEX files. It provides
 Single Point Positioning (SPP) solutions by least squares adjustment using pseudo-range observations using precise ephemeris and clock files. GNSSpy can be used for editing (slicing, decimating, merging) and quality checking (multipath,ionospheric delay, SNR) for RINEX files. Ionospheric delay can be calculated from GNSS atmospheric models of IGS for single frequency RINEX data or removed using dual frequency RINEX data. It can be used for visualizing GNSS data such as skyplot, azimuth-elevation,time-elevation, ground track and band plots. Additionally, this library can be used for basic geodetic computations such as geodetic positions on reference ellipsoid and projection computations.
