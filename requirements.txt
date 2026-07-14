@@ -1,5 +1,4 @@
-pandas
-numpy
-patool
-matplotlib
-
+numpy>=1.23
+pandas>=1.5
+requests>=2.28
+unlzw3>=0.2

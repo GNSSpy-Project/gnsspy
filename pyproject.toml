@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gnsspy"
+version = "3.0.1"
+description = "An open-source Python library for RINEX conversion, multi-GNSS data handling, orbit analysis and visualization."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Mustafa Serkan Isik"},
+    {name = "Volkan Ozbey"}
+]
+keywords = [
+    "GNSS",
+    "GPS",
+    "multi-GNSS",
+    "RINEX",
+    "SP3",
+    "CLK",
+    "IONEX",
+    "orbit analysis",
+    "geodesy",
+    "Python"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering"
+]
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "requests>=2.28",
+    "unlzw3>=0.2",
+]
+
+[project.optional-dependencies]
+visualization = [
+    "matplotlib>=3.6",
+    "plotly>=5",
+    "scipy>=1.9",
+]
+products = [
+    "scipy>=1.9",
+    "georinex>=1.16",
+]
+workflows = [
+    "matplotlib>=3.6",
+    "plotly>=5",
+    "scipy>=1.9",
+    "georinex>=1.16",
+    "openpyxl>=3.1",
+]
+all = [
+    "matplotlib>=3.6",
+    "plotly>=5",
+    "scipy>=1.9",
+    "georinex>=1.16",
+    "openpyxl>=3.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/GNSSpy-Project/gnsspy"
+Repository = "https://github.com/GNSSpy-Project/gnsspy"
+
+[project.scripts]
+gnsspy = "gnsspy.cli.main:main"
+gnsspy-download = "gnsspy.cli.download:main"
+gnsspy-visualize = "gnsspy.cli.visualize:main"
+gnsspy-convert-rinex = "gnsspy.cli.convert_rinex:main"
+
+[tool.setuptools.packages.find]
+include = ["gnsspy*"]
+exclude = ["tools*"]
+
+[tool.setuptools.package-data]
+gnsspy = ["data/*.txt", "bin/*"]
