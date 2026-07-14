@@ -1,2 +1,9 @@
-include LICENSE
 include README.md
+include requirements.txt
+include LICENSE
+recursive-include docs *.md
+recursive-include gnsspy/data *
+recursive-include gnsspy/bin *
+recursive-include bin *
+global-exclude *.pyc
+global-exclude *.pyo

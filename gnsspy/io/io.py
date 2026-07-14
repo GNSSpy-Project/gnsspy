@@ -1,7 +1,7 @@
 """
 Class definitions for I/O opreations
 """
-# ======================================================================
+
 class Observation:
     """
     Observations class for RINEX Observation (*.*o) files
@@ -30,9 +30,9 @@ class _ObservationTypes:
         self.QZSS    = ToB_QZSS
         self.IRSS    = ToB_IRSS
         self.SBAS    = ToB_SBAS
-# ======================================================================
 
-# ======================================================================
+
+
 class Navigation:
     """
     Navigation class for RINEX Observation (*.*n/p) files
@@ -41,9 +41,9 @@ class Navigation:
         self.epoch           = epoch
         self.navigation      = navigation
         self.version         = version
-# ======================================================================
 
-# ======================================================================
+
+
 class Navigation_DEPRECATED:
     """
     Broadcast Ephemeris in RINEX file
@@ -71,9 +71,9 @@ class Navigation_DEPRECATED:
         self.i0          = i0
         self.bigomega0   = bigomega0
         self.bigomegadot = bigomegadot
-# ======================================================================
 
-# ======================================================================
+
+
 
 class PEphemeris:
     """
