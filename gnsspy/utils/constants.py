@@ -317,12 +317,12 @@ _SYSTEM_RNX2  = {'GPS' : {
             }
 
 def _system_name(satellite_list):
-    system = ["GPS"     if sv[0]=="G" else 
-              "GLONASS" if sv[0]=="R" else 
-              "COMPASS" if sv[0]=="C" else 
+    system = ["GPS"     if sv[0]=="G" else
+              "GLONASS" if sv[0]=="R" else
+              "COMPASS" if sv[0]=="C" else
               "GALILEO" if sv[0]=="E" else
               "QZSS"    if sv[0]=="J" else
-              "IRNSS"   if sv[0]=="I" else 
-              "SBAS"    if sv[0]=="S" else 
+              "IRNSS"   if sv[0]=="I" else
+              "SBAS"    if sv[0]=="S" else
               "UNKNOWN" for sv in satellite_list]
     return system

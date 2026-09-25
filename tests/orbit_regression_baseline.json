@@ -1,0 +1,705 @@
+{
+  "description": "Deterministic broadcast-orbit reference vectors; not an independent orbit-accuracy benchmark.",
+  "cases": [
+    {
+      "label": "gps_meo_0",
+      "system": "G",
+      "gps_tow": 0.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5153.7,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -22104687.50692953,
+        -9897487.451764472,
+        -10673236.615538469
+      ]
+    },
+    {
+      "label": "gps_meo_14",
+      "system": "G",
+      "gps_tow": 14.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5153.7,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -22115675.068353336,
+        -9913201.621676866,
+        -10634561.518090235
+      ]
+    },
+    {
+      "label": "gps_meo_3600",
+      "system": "G",
+      "gps_tow": 3600.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5153.7,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -23298042.877335146,
+        -12316329.209812393,
+        267183.3000717023
+      ]
+    },
+    {
+      "label": "gps_meo_43200",
+      "system": "G",
+      "gps_tow": 43200.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5153.7,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        22199610.565643743,
+        10031711.032484615,
+        -10334587.957700562
+      ]
+    },
+    {
+      "label": "gps_meo_604799",
+      "system": "G",
+      "gps_tow": 604799.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5153.7,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -22103901.226385087,
+        -9896362.950076733,
+        -10675997.403126216
+      ]
+    },
+    {
+      "label": "galileo_meo_0",
+      "system": "E",
+      "gps_tow": 0.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5440.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.97,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -24467030.15389053,
+        -11204305.367785452,
+        -12059705.646180028
+      ]
+    },
+    {
+      "label": "galileo_meo_14",
+      "system": "E",
+      "gps_tow": 14.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5440.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.97,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -24479808.157883435,
+        -11215050.271030866,
+        -12022552.326165328
+      ]
+    },
+    {
+      "label": "galileo_meo_3600",
+      "system": "E",
+      "gps_tow": 3600.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5440.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.97,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -26528345.70032913,
+        -12519539.210965147,
+        -1630740.3858814805
+      ]
+    },
+    {
+      "label": "galileo_meo_43200",
+      "system": "E",
+      "gps_tow": 43200.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5440.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.97,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        13986995.935788274,
+        -9853237.165608395,
+        -24339723.65832999
+      ]
+    },
+    {
+      "label": "galileo_meo_604799",
+      "system": "E",
+      "gps_tow": 604799.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5440.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.97,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -24466116.4026586,
+        -11203536.01622697,
+        -12062358.049982477
+      ]
+    },
+    {
+      "label": "beidou_meo_0",
+      "system": "C",
+      "gps_tow": 0.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5282.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -23207449.975491423,
+        -10382710.613038313,
+        -11248956.014555238
+      ]
+    },
+    {
+      "label": "beidou_meo_14",
+      "system": "C",
+      "gps_tow": 14.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5282.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -23218960.16125423,
+        -10396408.760222945,
+        -11211262.574516777
+      ]
+    },
+    {
+      "label": "beidou_meo_3600",
+      "system": "C",
+      "gps_tow": 3600.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5282.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -24754581.964759186,
+        -12392569.521596137,
+        -616556.3530896782
+      ]
+    },
+    {
+      "label": "beidou_meo_43200",
+      "system": "C",
+      "gps_tow": 43200.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5282.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        20885029.32950658,
+        1016032.2158066854,
+        -18500683.05445721
+      ]
+    },
+    {
+      "label": "beidou_meo_604799",
+      "system": "C",
+      "gps_tow": 604799.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 5282.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -23206626.586811192,
+        -10381730.243242532,
+        -11251646.839535948
+      ]
+    },
+    {
+      "label": "beidou_igso_0",
+      "system": "C",
+      "gps_tow": 0.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -35069400.05441003,
+        -15715406.173164338,
+        -16972005.992367696
+      ]
+    },
+    {
+      "label": "beidou_igso_14",
+      "system": "C",
+      "gps_tow": 14.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -35086160.9173429,
+        -15710008.897485085,
+        -16941334.152960245
+      ]
+    },
+    {
+      "label": "beidou_igso_3600",
+      "system": "C",
+      "gps_tow": 3600.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -38812788.61653475,
+        -13284481.40633478,
+        -8589512.811016373
+      ]
+    },
+    {
+      "label": "beidou_igso_43200",
+      "system": "C",
+      "gps_tow": 43200.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -35489247.34200621,
+        -16891928.5356311,
+        15686472.45497939
+      ]
+    },
+    {
+      "label": "beidou_igso_604799",
+      "system": "C",
+      "gps_tow": 604799.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.95,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -35068202.4133725,
+        -15715790.376162646,
+        -16974196.153982226
+      ]
+    },
+    {
+      "label": "beidou_geo_0",
+      "system": "C",
+      "gps_tow": 0.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.02,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -40968817.53138135,
+        -9216807.537327105,
+        -1221575.895719419
+      ]
+    },
+    {
+      "label": "beidou_geo_14",
+      "system": "C",
+      "gps_tow": 14.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.02,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -40968290.77529673,
+        -9216921.885648401,
+        -1224488.5722577702
+      ]
+    },
+    {
+      "label": "beidou_geo_3600",
+      "system": "C",
+      "gps_tow": 3600.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.02,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -40827871.11601517,
+        -9278459.03535338,
+        -1919602.7768789502
+      ]
+    },
+    {
+      "label": "beidou_geo_43200",
+      "system": "C",
+      "gps_tow": 43200.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.02,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -40887836.536091015,
+        -10826836.14112634,
+        1361538.5440345095
+      ]
+    },
+    {
+      "label": "beidou_geo_604799",
+      "system": "C",
+      "gps_tow": 604799.0,
+      "ephemeris": {
+        "Toe": 0.0,
+        "sqrtA": 6493.0,
+        "DeltaN": 4.5e-09,
+        "M0": -1.2,
+        "Eccentricity": 0.01,
+        "omega": 0.7,
+        "Cus": -2e-06,
+        "Cuc": 1e-06,
+        "Crs": -56.25,
+        "Crc": 250.0,
+        "Io": 0.02,
+        "Cis": -4e-08,
+        "Cic": 3e-08,
+        "IDOT": 1e-10,
+        "Omega0": -2.4,
+        "OmegaDot": -8e-09
+      },
+      "expected_original_xyz_m": [
+        -40968855.14783634,
+        -9216799.406734558,
+        -1221367.7981008242
+      ]
+    }
+  ]
+}

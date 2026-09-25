@@ -1,5 +1,3 @@
-
-
 import numpy as _np
 from gnsspy.geodesy.coordinate import _ellipsoid
 
@@ -35,9 +33,8 @@ def ell2tm(latitude, longitude, longitude_CM, ellipsoid = 'GRS80'):
     easting = N*(dlambda*_np.cos(Phi)+((dlambda**3*_np.cos(Phi)**3)/6)*(1-t**2+n**2) +
         ((dlambda**5*_np.cos(Phi)**5)/120)*(5-18*t**2+t**4+14*n**2-58*t**2*n**2+13*n**4+4*n**6-64*n**4*t**2-24*n**6*t**2) +
         ((dlambda**7*_np.cos(Phi)**7)/5040)*(61-479*t**2+179*t**4-t**6))
-    
-    easting += 500000
 
+    easting += 500000
 
 
     A0 = 1 - ell.e1**2/4 - (3/64)*ell.e1**4 - (5/256)*ell.e1**6 - (175/16384)*ell.e1**8

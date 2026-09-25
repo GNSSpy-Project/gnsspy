@@ -5,9 +5,9 @@ Copyright (c) 2019 Mustafa Serkan Isik and Volkan Ozbey
 try:
     from gnsspy._version import __version__
 except Exception:
-    __version__ = "3.0.1"
+    __version__ = "3.0.2"
 
-from gnsspy.io.rinex.navigation import read_navFile
+from gnsspy.io.rinex.navigation import read_navFile, read_navigation_file
 from gnsspy.io.rinex.observation import read_obsFile
 from gnsspy.io.products.sp3 import read_sp3File
 from gnsspy.io.products.clk import read_clockFile
@@ -23,3 +23,7 @@ from gnsspy.utils.date import (gpsweekday, gpswdtodate, jday, julianday2date,
                                doy, doy2date, datetime2doy)
 
 __author__ = "Mustafa Serkan Isik & Volkan Ozbey"
+
+
+from gnsspy.io.products.ionex import read_ionex, IonexDataset, IonexFormatError, IonexProductError
+from gnsspy.atmosphere.ionosphere import interpolate_vtec

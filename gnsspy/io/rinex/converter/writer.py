@@ -19,9 +19,6 @@ from .obs_codes import (
 )
 
 
-
-
-
 def _pad60(data: str, label: str) -> str:
     """Compose a 80-char header line from a 60-char data field + label."""
     return f"{data:<60s}{label:<20s}\n"
@@ -46,9 +43,6 @@ def _fmt_obs(val: ObsValue) -> str:
 
 def _now_stamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%d %H%M%S UTC")
-
-
-
 
 
 def write_rinex3(data: ObsData, out_path: str | Path, version: float = 3.04) -> None:
@@ -85,11 +79,6 @@ def write_rinex3(data: ObsData, out_path: str | Path, version: float = 3.04) -> 
     final_codes = {s: v for s, v in final_codes.items() if s in systems_present}
 
 
-
-
-
-
-
     used: Dict[str, set] = {s: set() for s in final_codes}
     for ep in data.epochs:
         for sat, sat_obs in ep.obs.items():
@@ -108,9 +97,6 @@ def write_rinex3(data: ObsData, out_path: str | Path, version: float = 3.04) -> 
         for s, codes in final_codes.items()
     }
     final_codes = {s: codes for s, codes in final_codes.items() if codes}
-
-
-
 
 
     glonass_slots: Dict[str, int] = {}
@@ -179,9 +165,6 @@ def _write_rinex3_header(f, h: ObsHeader, final_codes, version: float,
     f.write(_pad60(f"{dh:14.4f}{de:14.4f}{dn:14.4f}{'':18s}", "ANTENNA: DELTA H/E/N"))
 
 
-
-
-
     _sys_order = "GRECJIS"
     ordered_systems = [s for s in _sys_order if s in final_codes]
     ordered_systems += [s for s in final_codes if s not in ordered_systems]
@@ -222,12 +205,10 @@ def _write_rinex3_header(f, h: ObsHeader, final_codes, version: float,
     else:
 
 
-
         for sys_letter, codes in final_codes.items():
             for c in codes:
                 if c.startswith("L"):
                     f.write(_pad60(f"{sys_letter} {c:<3s}", "SYS / PHASE SHIFT"))
-
 
 
     slots = h.glonass_slots or (glonass_slots or {})
@@ -301,9 +282,6 @@ def _write_rinex3_body(f, data: ObsData, code_maps, final_codes) -> None:
             f.write("".join(parts).rstrip() + "\n")
 
 
-
-
-
 def write_rinex2(
     data: ObsData,
     out_path: str | Path,
@@ -327,9 +305,6 @@ def write_rinex2(
     keep_set = set(keep_systems)
 
 
-
-
-
     raw_maps: Dict[str, Dict[str, str]] = {}
     for sys_letter in list(data.header.obs_types.keys()):
         if sys_letter not in keep_set:
@@ -340,10 +315,6 @@ def write_rinex2(
             raw_maps[sys_letter] = mapping
         else:
             raw_maps[sys_letter] = {c: c for c in codes}
-
-
-
-
 
 
     counts: Dict[str, Dict[str, int]] = {s: {} for s in raw_maps}
@@ -372,7 +343,6 @@ def write_rinex2(
 
             best = max(srcs, key=lambda s: (cc.get(s, 0), -src_order.index(s)))
             code_maps[sys_letter][best] = dst
-
 
 
     union_codes: List[str] = []

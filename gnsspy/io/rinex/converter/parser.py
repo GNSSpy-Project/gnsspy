@@ -20,11 +20,7 @@ from typing import List, Optional, Tuple
 from .models import ObsData, ObsEpoch, ObsHeader, ObsValue
 
 
-
 OBS_FIELD_WIDTH = 16
-
-
-
 
 
 def parse_file(path: str | Path) -> ObsData:
@@ -74,9 +70,6 @@ def _read_all_lines(path: Path) -> List[str]:
         return io.StringIO(text).readlines()
     with path.open("r", encoding="ascii", errors="replace") as f:
         return f.readlines()
-
-
-
 
 
 def _label(line: str) -> str:
@@ -142,9 +135,6 @@ def _decode_obs_field(s: str) -> ObsValue:
     lli = _safe_int(s[14:15])
     ss = _safe_int(s[15:16])
     return val, lli, ss
-
-
-
 
 
 def _parse_rinex2_header(lines: List[str]) -> Tuple[ObsHeader, int]:
@@ -308,9 +298,6 @@ def _parse_rinex2_body(lines, start, header) -> List[ObsEpoch]:
             ObsEpoch(epoch=dt, flag=flag, rcv_clock_offset=clk, obs=epoch_obs)
         )
     return epochs
-
-
-
 
 
 def _parse_rinex3_header(lines: List[str]) -> Tuple[ObsHeader, int]:

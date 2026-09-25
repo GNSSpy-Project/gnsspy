@@ -10,10 +10,6 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 
-
-
-
-
 ObsValue = Tuple[Optional[float], Optional[int], Optional[int]]
 
 
@@ -45,10 +41,6 @@ class ObsHeader:
     antenna_delta_hen: Tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 
-
-
-
-
     obs_types: Dict[str, List[str]] = field(default_factory=dict)
 
     interval: Optional[float] = None
@@ -67,7 +59,6 @@ class ObsHeader:
     glonass_slots: Dict[str, int] = field(default_factory=dict)
 
     glonass_cod_phs_bis: Dict[str, float] = field(default_factory=dict)
-
 
 
     wavelength_fact: Tuple[int, int] = (1, 1)

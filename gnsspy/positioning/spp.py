@@ -45,8 +45,8 @@ def spp(station, orbit, system="G", cut_off=7.0):
     gnss["Travel_time"] = gnss["Ionosphere_Free"] / _CLIGHT
     gnss["X_Reception"],gnss["Y_Reception"],gnss["Z_Reception"] = _reception_coord(gnss.X, gnss.Y, gnss.Z, gnss.Vx, gnss.Vy, gnss.Vz, gnss.Travel_time)
     epochList =gnss.index.get_level_values("Epoch").unique().sort_values()
-    epoch_start = epochList[0] 
-    epoch_offset= _timedelta(seconds=300) 
+    epoch_start = epochList[0]
+    epoch_offset= _timedelta(seconds=300)
     epoch_interval = _timedelta(seconds=station.interval-0.000001)
     epoch_stop  = epochList[-1] + _timedelta(seconds=0.000001)
     approx_position = [station.approx_position[0], station.approx_position[1], station.approx_position[2]]
@@ -60,7 +60,7 @@ def spp(station, orbit, system="G", cut_off=7.0):
             gnss_temp["Distance"] = distance + _sagnac(approx_position[0],approx_position[1],approx_position[2], gnss_temp.X_Reception, gnss_temp.Y_Reception, gnss_temp.Z_Reception)
             gnss_temp["Azimuth"], gnss_temp["Elevation"], gnss_temp["Zenith"] = _azel(station.approx_position[0], station.approx_position[1], station.approx_position[2], gnss_temp.X, gnss_temp.Y, gnss_temp.Z, gnss_temp.Distance)
             gnss_temp["Tropo"] = tropospheric_delay(station.approx_position[0],station.approx_position[1],station.approx_position[2], gnss_temp.Elevation, station.epoch)
-            coeffMatrix = _np.zeros([len(gnss_temp),4]) 
+            coeffMatrix = _np.zeros([len(gnss_temp),4])
             coeffMatrix[:,0] = (approx_position[0] - gnss_temp.X_Reception) / gnss_temp.Distance
             coeffMatrix[:,1] = (approx_position[1] - gnss_temp.Y_Reception) / gnss_temp.Distance
             coeffMatrix[:,2] = (approx_position[2] - gnss_temp.Z_Reception) / gnss_temp.Distance
@@ -86,7 +86,6 @@ def spp(station, orbit, system="G", cut_off=7.0):
     finish = time.time()
     print("Pseudorange calculation is done in", "{0:.2f}".format(finish-start), "seconds.")
     return (x_coordinate, y_coordinate, z_coordinate, rec_clock)
-
 
 
 standard_point_positioning = spp

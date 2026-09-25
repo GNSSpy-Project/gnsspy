@@ -1,5 +1,3 @@
-
-
 import numpy as _np
 
 __all__ = [
@@ -24,7 +22,6 @@ class _Ellipsoid:
         M = self.a * (1 - e2) / (1 - e2 * sin_phi2) ** (3 / 2)
         N = self.a / _np.sqrt(1 - e2 * sin_phi2)
         return M, N
-
 
 
 def _ellipsoid(ellipsoidName):
@@ -52,14 +49,7 @@ def ell2cart(lat, lon, h, ellipsoid='GRS80'):
     Returns
     -------
     x, y, z : float or ndarray
-        Earth-centred Earth-fixed Cartesian coordinates in metres.
-
-    Notes
-    -----
-    The prime-vertical radius of curvature must use the first eccentricity
-    squared (e^2). Earlier GNSSpy v3 prerelease code accidentally used the
-    second eccentricity itself, which produced incorrect heights and latitudes
-    in round-trip conversions.
+        Earth-centred Earth-fixed coordinates in metres.
     """
     ellipsoid = _ellipsoid(ellipsoid)
     lat = _np.deg2rad(lat)

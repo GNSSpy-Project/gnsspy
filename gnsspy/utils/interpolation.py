@@ -1,5 +1,3 @@
-
-
 import numpy as _np
 
 def clock_interp(fit, interval):

@@ -33,15 +33,11 @@ from gnsspy.io.rinex.converter import convert_file
 from gnsspy.io.rinex.converter.parser import parse_file
 
 
-
 DEFAULT_OUT_DIR = Path(_PROJECT_ROOT) / "output" / "converted"
 HATANAKA_HINT = (
     "Hatanaka-compressed files (.d, .crx) are not supported. "
     "Please use the plain observation form (.o / .rnx, optionally .gz)."
 )
-
-
-
 
 
 def _looks_hatanaka(path: Path) -> bool:
@@ -109,9 +105,6 @@ def _candidate_files(folder: Path, want_major: int):
         if (want_major == 2 and ver < 3.0) or (want_major == 3 and ver >= 3.0):
             out.append(p)
     return out
-
-
-
 
 
 def _source_local(want_major: int) -> Path | None:
@@ -228,9 +221,6 @@ def _source_download(want_major: int) -> Path | None:
     return fp
 
 
-
-
-
 def _default_output_path(src: Path, target_version: float) -> Path:
     DEFAULT_OUT_DIR.mkdir(parents=True, exist_ok=True)
     name = src.name
@@ -282,9 +272,6 @@ def _run_conversion(src: Path, target_version: float) -> None:
                 ui.print_info(f"  {s}: {' '.join(codes)}")
     except Exception as e:
         ui.print_warning(f"Could not re-parse output for summary: {e}")
-
-
-
 
 
 def main() -> None:

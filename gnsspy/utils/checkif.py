@@ -1,5 +1,3 @@
-
-
 import os
 import http.client
 
@@ -14,9 +12,8 @@ from gnsspy.io.manipulate import crx2rnx
 from gnsspy.data.IGS import is_IGS
 
 
-
 global _CWD
-_CWD = os.getcwd() 
+_CWD = os.getcwd()
 
 def isfloat(value):
     """ Check if variable is float """
@@ -55,36 +52,47 @@ def _get_credentials():
     return username, password
 
 def isexist(fileName):
-    """
-    Checks if file exists, otherwise attempts to download
-    using the new backend system.
-    
-    Search order:
-    1. Verilen tam yol
-    2. backend/data/ directory structure (sp3/, clk/, observation/, etc.)
-    3. Working directory
-    4. Download (if not found)
-    """
+    """Check for a local file and attempt product acquisition when absent."""
 
     if os.path.exists(fileName):
         return True
-    
+
+
+    from gnsspy.utils.ionex_files import is_ionex_path, resolve_ionex_path
+    if is_ionex_path(fileName):
+        try:
+            resolve_ionex_path(fileName)
+            return True
+        except FileNotFoundError:
+            return False
+
+
+    from gnsspy.utils.product_files import product_kind, resolve_product_path
+    kind = product_kind(fileName)
+    if kind:
+        try:
+            actual = resolve_product_path(fileName,kind)
+            print(f"   Found local {kind.upper()}: {actual}")
+            return True
+        except FileNotFoundError:
+            print(f"   {kind.upper()} not found. Supply its actual path or download explicitly; no renaming is required.")
+            return False
 
 
     basename = os.path.basename(fileName)
     ext = basename.split('.')[-1].lower()
-    
+
 
     possible_data_dirs = [
         os.path.join(_CWD, "gnsspy", "backend", "data"),
         os.path.join(_CWD, "backend", "data"),
         os.path.join(_CWD, "data"),
     ]
-    
+
     for data_dir in possible_data_dirs:
         if not os.path.exists(data_dir):
             continue
-            
+
 
         if ext == 'sp3':
             subdir = "sp3"
@@ -98,7 +106,7 @@ def isexist(fileName):
             subdir = "ionosphere"
         else:
             subdir = None
-        
+
         if subdir:
             full_path = os.path.join(data_dir, subdir, basename)
             if os.path.exists(full_path):
@@ -106,7 +114,7 @@ def isexist(fileName):
 
 
                 return True
-    
+
 
     if os.path.exists(fileName + ".Z"):
 
@@ -115,7 +123,7 @@ def isexist(fileName):
 
 
     print(f"{fileName} not found in working directory. Attempting download...")
-    
+
     if not check_internet():
         raise ConnectionError("No internet connection! Cannot download.")
 
@@ -132,16 +140,14 @@ def isexist(fileName):
     try:
 
 
-        
         parts = fileName.split('.')
         ext = parts[-1].lower()
-        
+
         if ext == 'sp3':
 
 
-
             basename = parts[0]
-            
+
 
             try:
                 gpsweekday_str = basename[-5:]
@@ -154,18 +160,15 @@ def isexist(fileName):
         else:
 
             fileEpoch = doy2date(fileName)
-            
+
     except Exception as e:
         print(f"Date format could not be parsed: {fileName} | Error: {e}")
         return False
 
 
-
-
-    
     parts = fileName.split('.')
     ext = parts[-1].lower()
-    
+
     success = False
     msg = ""
 
@@ -183,7 +186,7 @@ def isexist(fileName):
         station = fileName[:4]
 
         success, msg = obs_dl.download_single(station, fileEpoch, rinex_version=3)
-        
+
 
         if success:
 
@@ -204,11 +207,10 @@ def isexist(fileName):
     elif ext == 'sp3':
 
 
-
         center_prefix = fileName[:3].upper()
-        
+
         success, msg, mode = nav_dl.download_sp3_with_fallback(
-            center=center_prefix, 
+            center=center_prefix,
             date=fileEpoch,
             orbit_type='final'
         )
@@ -218,7 +220,7 @@ def isexist(fileName):
 
         center_prefix = fileName[:3].upper()
         success, msg, mode = nav_dl.download_sp3_with_fallback(
-            center=center_prefix, 
+            center=center_prefix,
             date=fileEpoch
         )
 

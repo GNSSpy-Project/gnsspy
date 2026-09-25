@@ -1,13 +1,8 @@
-
-
 import os
 import netrc as _netrc
 import requests
 
-from .config import BASE_URL, NETRC_FILE 
-
-
-
+from .config import BASE_URL, NETRC_FILE
 
 
 STATION_CODES = {
@@ -143,18 +138,14 @@ def get_full_code(station_code):
     Converts 4-character station code to 9 characters
     """
     station_upper = station_code.upper()
-    
+
     if len(station_upper) == 9:
         return station_upper
-    
+
     if len(station_upper) == 4:
         return STATION_CODES.get(station_upper, f"{station_upper}00XXX")
-    
+
     return station_upper
-
-
-
-
 
 
 def save_credentials(username, password):
@@ -166,13 +157,13 @@ def save_credentials(username, password):
             f.write("machine urs.earthdata.nasa.gov\n")
             f.write(f"login {username}\n")
             f.write(f"password {password}\n")
-        
+
 
         if os.name != 'nt':
             os.chmod(NETRC_FILE, 0o600)
-        
+
         return True, "Credentials saved successfully"
-    
+
     except Exception as e:
         return False, f"Save error: {str(e)}"
 
@@ -185,7 +176,7 @@ def test_credentials(username, password):
 
         test_url = "https://urs.earthdata.nasa.gov/profile"
         response = requests.get(test_url, auth=(username, password), timeout=30)
-        
+
         if response.status_code == 200:
             return True, "Login successful"
         elif response.status_code == 401:
@@ -194,7 +185,7 @@ def test_credentials(username, password):
             return False, "CDDIS authorization required\nhttps://cddis.nasa.gov/"
         else:
             return False, f"Unknown error: {response.status_code}"
-    
+
     except Exception as e:
         return False, f"Connection error: {str(e)}"
 

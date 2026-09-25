@@ -1,7 +1,8 @@
 """Visualization tools for GNSSpy v3.
 
-The visualization layer provides Plotly-based interactive plots for
-satellite geometry, visibility, SNR diagnostics and ground tracks.
+Geographic maps use Cartopy by default, with Plotly available explicitly.
+Non-geographic skyplots, geometry, SNR and visibility plots retain Plotly.
+Optional plotting libraries are imported only when a renderer is called.
 """
 
 from gnsspy.visualization.skyplot import skyplot
@@ -23,7 +24,11 @@ from gnsspy.visualization.groundtrack import (
     ground_track,
 )
 
+from gnsspy.visualization.ionosphere import ionosphere_map, ionosphere_maps, tec_map, tec_maps
+from gnsspy.visualization._maps import MapStyle
+
 __all__ = [
+    "MapStyle", "ionosphere_map", "ionosphere_maps", "tec_map", "tec_maps",
     "skyplot",
     "azelplot",
     "azimuth_elevation_plot",

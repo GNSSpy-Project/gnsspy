@@ -22,11 +22,11 @@ def tropospheric_delay(x, y, z, elevation, epoch):
     Parameters
     ----------
     x, y, z : float
-        Receiver coordinates in the Earth-Centred Earth-Fixed frame.
+        Receiver Earth-centred Earth-fixed coordinates in metres.
     elevation : float or array-like
-        Satellite elevation angle in degrees.
+        Satellite elevation in degrees.
     epoch : datetime-like
-        Observation epoch used to model seasonal atmospheric variation.
+        Observation epoch for the seasonal atmospheric model.
 
     Returns
     -------
@@ -35,9 +35,7 @@ def tropospheric_delay(x, y, z, elevation, epoch):
 
     Notes
     -----
-    The implementation follows the Collins tropospheric model retained
-    from the earlier GNSSpy release. Ellipsoidal height is used as an
-    approximation for orthometric height.
+    Ellipsoidal height approximates orthometric height.
     """
     lat, lon, ellHeight = _cart2ell(x, y, z)
     ortHeight = ellHeight
@@ -48,7 +46,6 @@ def tropospheric_delay(x, y, z, elevation, epoch):
     Rd = 287.054
     g = 9.80665
     gm = 9.784
-
 
 
     ave_params = _np.array([
@@ -131,7 +128,6 @@ def tropospheric_delay(x, y, z, elevation, epoch):
     )
 
     return (d_dry + d_wet) * mapping
-
 
 
 compute_tropospheric_delay = tropospheric_delay

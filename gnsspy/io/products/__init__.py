@@ -12,3 +12,7 @@ __all__ = [
     "read_ionFile",
     "read_ionex_file",
 ]
+
+
+from gnsspy.io.products.ionex import read_ionex, IonexDataset, IonexFormatError, IonexProductError
+__all__ += ["read_ionex", "IonexDataset", "IonexFormatError", "IonexProductError"]

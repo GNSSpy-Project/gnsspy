@@ -1,14 +1,15 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "gnsspy"
-version = "3.0.1"
+version = "3.0.2"
 description = "An open-source Python library for RINEX conversion, multi-GNSS data handling, orbit analysis and visualization."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT AND LicenseRef-RNXCMP"
+license-files = ["LICENSE", "gnsspy/bin/RNX2CMP_LICENSE.txt"]
 authors = [
     {name = "Mustafa Serkan Isik"},
     {name = "Volkan Ozbey"}
@@ -28,7 +29,6 @@ keywords = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -43,27 +43,37 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+test = ["pytest>=7"]
+cartopy = ["matplotlib>=3.6", "cartopy>=0.22", "cmcrameri>=1.8"]
+plotly = ["plotly>=5", "scipy>=1.9"]
+plotly-png = ["plotly>=6.1.1", "kaleido>=1.0", "scipy>=1.9"]
 visualization = [
+    "cartopy>=0.22",
+    "cmcrameri>=1.8",
+    "kaleido>=1.0",
     "matplotlib>=3.6",
-    "plotly>=5",
+    "plotly>=6.1.1",
     "scipy>=1.9",
 ]
 products = [
     "scipy>=1.9",
-    "georinex>=1.16",
 ]
 workflows = [
+    "cartopy>=0.22",
+    "cmcrameri>=1.8",
+    "kaleido>=1.0",
     "matplotlib>=3.6",
-    "plotly>=5",
+    "plotly>=6.1.1",
     "scipy>=1.9",
-    "georinex>=1.16",
     "openpyxl>=3.1",
 ]
 all = [
+    "cartopy>=0.22",
+    "cmcrameri>=1.8",
+    "kaleido>=1.0",
     "matplotlib>=3.6",
-    "plotly>=5",
+    "plotly>=6.1.1",
     "scipy>=1.9",
-    "georinex>=1.16",
     "openpyxl>=3.1",
 ]
 
@@ -75,11 +85,16 @@ Repository = "https://github.com/GNSSpy-Project/gnsspy"
 gnsspy = "gnsspy.cli.main:main"
 gnsspy-download = "gnsspy.cli.download:main"
 gnsspy-visualize = "gnsspy.cli.visualize:main"
+gnsspy-map = "gnsspy.cli.maps:main"
 gnsspy-convert-rinex = "gnsspy.cli.convert_rinex:main"
 
 [tool.setuptools.packages.find]
 include = ["gnsspy*"]
-exclude = ["tools*"]
+exclude = ["tests*"]
 
 [tool.setuptools.package-data]
 gnsspy = ["data/*.txt", "bin/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

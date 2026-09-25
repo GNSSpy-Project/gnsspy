@@ -1,9 +1,16 @@
-include README.md
-include requirements.txt
 include LICENSE
+include README.md
+include RELEASE_NOTES.md
+include requirements.txt
+include .gitignore
 recursive-include docs *.md
-recursive-include gnsspy/data *
+recursive-include examples *.py *.md
+recursive-include gnsspy/data *.txt
 recursive-include gnsspy/bin *
 recursive-include bin *
-global-exclude *.pyc
-global-exclude *.pyo
+recursive-include tests *.py *.json
+global-exclude *.py[cod]
+global-exclude .DS_Store
+global-exclude ._*
+prune __MACOSX
+prune .pytest_cache

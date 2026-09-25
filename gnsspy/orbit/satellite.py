@@ -1,5 +1,3 @@
-
-
 import numpy as _np
 from gnsspy.utils.constants import _CLIGHT
 from gnsspy.utils.constants import _OMEGA
@@ -34,8 +32,8 @@ def _sagnac(x_rec, y_rec, z_rec, x_sat, y_sat, z_sat):
 
 def _azel(x_rec,y_rec,z_rec, x_sat, y_sat, z_sat, distance):
     lat_rec, lon_rec, h_rec = cart2ell(x_rec,y_rec,z_rec)
-    east, north, up = ell2topo(lat_rec, lon_rec, h_rec) 
-    unit_p = _np.matrix([(x_sat-x_rec)/distance, 
+    east, north, up = ell2topo(lat_rec, lon_rec, h_rec)
+    unit_p = _np.matrix([(x_sat-x_rec)/distance,
                          (y_sat-y_rec)/distance,
                          (z_sat-z_rec)/distance])
     elevation = []
@@ -45,7 +43,7 @@ def _azel(x_rec,y_rec,z_rec, x_sat, y_sat, z_sat, distance):
         azimuth.append(_np.arctan2(_np.matmul(_np.transpose(unit_p[:,i]),east), _np.matmul(_np.transpose(unit_p[:,i]),north)))
         elevation[i] = elevation[i].item()
         azimuth[i]   = azimuth[i].item()
-    
+
     elevation = _np.degrees(elevation)
     azimuth = _np.degrees(azimuth)
     zenith = _np.degrees(_np.pi/2)-elevation
@@ -53,7 +51,6 @@ def _azel(x_rec,y_rec,z_rec, x_sat, y_sat, z_sat, distance):
 
 def posvel():
     raise Warning("This function will be available in the next release...")
-
 
 
 relativistic_clock_correction = _relativistic_clock

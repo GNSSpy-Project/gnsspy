@@ -28,8 +28,8 @@ def multipath(station, system="G"):
     pseudorange2  = getattr(observation,observation_list[1][3])
     frequency1 = observation_list[0][4]
     frequency2 = observation_list[1][4]
-    lam1 = _CLIGHT/frequency1 
-    lam2 = _CLIGHT/frequency2 
+    lam1 = _CLIGHT/frequency1
+    lam2 = _CLIGHT/frequency2
     ioncoeff = (frequency1/frequency2)**2
     observation["Multipath1"] = pseudorange1 - (2/(ioncoeff-1)+1)*(carrierPhase1*lam1) + (2/(ioncoeff-1))*(carrierPhase2*lam2)
     observation["Multipath2"] = pseudorange2 - (2*ioncoeff/(ioncoeff-1))*(carrierPhase1*lam1) + (2*ioncoeff/(ioncoeff-1)-1)*(carrierPhase2*lam2)
@@ -61,7 +61,6 @@ def multipath(station, system="G"):
     observation["Multipath1"] = Multipath1
     observation["Multipath2"] = Multipath2
     return observation
-
 
 
 compute_multipath = multipath

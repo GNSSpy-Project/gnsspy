@@ -11,6 +11,7 @@ from gnsspy.io.rinex.observation import (
 from gnsspy.io.rinex.navigation import (
     read_navFile,
     read_navigation_file,
+    RinexNavigationError,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "read_observation_file_v3",
     "read_navFile",
     "read_navigation_file",
+    "RinexNavigationError",
 ]

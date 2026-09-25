@@ -26,7 +26,6 @@ def _adjustment(coeffMatrix,LMatrix):
     return XMatrix, rmse
 
 
-
 least_squares_adjustment = _adjustment
 
 __all__ = [

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 """
 comparison.py
 =============
@@ -10,26 +10,16 @@ from pathlib import Path
 from contextlib import contextmanager
 import numpy as np
 
+import pandas as pd
 
+from gnsspy.io.rinex.navigation import _open_navigation_text
+from gnsspy.orbit.ephemeris import (
+    build_ephemeris_table, find_nearest_eph, find_latest_eph,
+    ephemeris_age_seconds, _is_healthy,
+)
 
-
-try:
-    import georinex as gr
-    import pandas as pd
-except ImportError as exc:
-    raise ImportError(
-        "Orbit-comparison workflows require optional dependencies. "
-        "Install them with: pip install 'gnsspy[workflows]'"
-    ) from exc
-
-from gnsspy.utils.filename import sp3FileName, clockFileName
+from gnsspy.utils.product_files import parse_product_name, product_kind, as_date
 from gnsspy.orbit.precise import sp3_interp
-
-
-
-
-
-
 
 
 _ORBIT_R_BOUNDS = {
@@ -49,7 +39,6 @@ _OMEGA_E_CGCS  = 7.2921150e-5
 _BDS_GPST_OFFSET = 14.0
 
 
-
 _BDS_GEO_INC_RAD = np.deg2rad(5.0)
 
 _BDS_GEO_PHI_X = np.deg2rad(-5.0)
@@ -63,6 +52,20 @@ def compute_keplerian_xyz(eph, tgps, sys_type):
 
     Returns [x, y, z] in metres, or None if the result fails the per-system
     orbit-radius sanity check."""
+    required = ("Toe", "sqrtA", "DeltaN", "M0", "Eccentricity", "omega",
+                "Cus", "Cuc", "Crs", "Crc", "Cis", "Cic", "IDOT",
+                "Omega0", "OmegaDot")
+    if sys_type not in {"G", "E", "C"}:
+        raise ValueError("Comparison propagation supports G, E and C only")
+    try:
+        values = [float(eph[key]) for key in required]
+        values.append(float(eph['Io'] if 'Io' in eph else eph['i0']))
+        if (not np.all(np.isfinite(values)) or not np.isfinite(tgps)
+                or float(eph['sqrtA']) <= 0
+                or not 0 <= float(eph['Eccentricity']) < 1):
+            return None
+    except (KeyError, ValueError, TypeError):
+        return None
 
     if sys_type == 'G':
         GM, OMEGA_E = 3.986005e14, _OMEGA_E_WGS84
@@ -138,17 +141,17 @@ def compute_keplerian_xyz(eph, tgps, sys_type):
 
     r = np.sqrt(x**2 + y**2 + z**2)
     r_min, r_max = _ORBIT_R_BOUNDS.get(sys_type, (_ORBIT_R_MIN, _ORBIT_R_MAX))
-    if r < r_min or r > r_max:
+    if not np.isfinite(r) or r < r_min or r > r_max:
         return None
 
     return [x, y, z]
 
 
-
-
-
 def datetime_to_gps_tow(dt):
-    """datetime -> GPS Time of Week (seconds)"""
+    """Naive GPST calendar datetime -> GPS seconds of week (not UTC conversion)."""
+    dt = pd.Timestamp(dt)
+    if pd.isna(dt) or dt.tzinfo is not None:
+        raise ValueError("Pass a timezone-naive GPST datetime, not a UTC datetime")
     return (dt - datetime.datetime(1980, 1, 6)).total_seconds() % 604800
 
 
@@ -170,78 +173,77 @@ def get_dates_from_nav_files(files):
 
 
 def detect_sp3_product(sp3_files):
-    """Determines product type from SP3 filenames."""
-    if not sp3_files:
-        return "igs"
-    bn = os.path.basename(sp3_files[0]).upper()
-    if bn.startswith("COD"): return "cod"
-    elif bn.startswith("GFZ") or bn.startswith("GBM"): return "gfz"
-    elif bn.startswith("ESA"): return "esa"
-    return "igs"
+    """Return the actual centre, never substitute IGS for an unrecognised name."""
+    for path in sp3_files:
+        info = parse_product_name(path)
+        if info:
+            return info.center.lower()
+    return "auto"
 
 
 def discover_files(data_dir):
-    """
-    Discovers nav, sp3, clk files in data directory.
-    Returns: (nav_files, sp3_files, clk_files)
-    """
-    all_files = [f for f in glob.glob(os.path.join(data_dir, "**", "*"), recursive=True)
-                 if 'temp_gnsspy' not in f and os.path.isfile(f)]
+    """Discover products and classify navigation files by their RINEX header.
 
-    sp3_files = [f for f in all_files if f.lower().endswith(('.sp3', '.sp3.gz'))]
-    clk_files = [f for f in all_files if f.lower().endswith('.clk')]
-
+    Plain and compressed navigation files are recognised. Observation files,
+    spreadsheets, logs and arbitrary directory contents are not sent to the
+    navigation parser. SP3/CLK discovery accepts long/legacy names and compressed variants.
+    """
+    all_files = sorted(f for f in glob.glob(os.path.join(data_dir, "**", "*"), recursive=True)
+                       if 'temp_gnsspy' not in f and os.path.isfile(f))
+    sp3_files = [f for f in all_files if product_kind(f) == 'sp3']
+    clk_files = [f for f in all_files if product_kind(f) == 'clk']
+    products = set(sp3_files + clk_files)
     nav_files = []
-    skip_ext = ('.sp3', '.sp3.gz', '.clk', '.crx', '.gz', '.z', '.eph')
-    skip_suffix = ('o.rnx', 'd.crx')
-    for f in all_files:
-        fl = f.lower()
-        if any(fl.endswith(e) for e in skip_ext): continue
-        if any(fl.endswith(s) for s in skip_suffix): continue
-        if len(fl) > 2 and fl[-1] in ['o', 'd'] and fl[-3] == '.': continue
-        nav_files.append(f)
-
+    for filename in all_files:
+        if filename in products:
+            continue
+        try:
+            with _open_navigation_text(filename) as stream:
+                for _, line in zip(range(10), stream):
+                    if not line.strip():
+                        continue
+                    if ('RINEX VERSION / TYPE' in line[60:]
+                            and line[20:21].upper() in {'N', 'G', 'H'}):
+                        nav_files.append(filename)
+                    break
+        except ImportError as exc:
+            warnings.warn(f"Cannot inspect {filename}: {exc}", RuntimeWarning, stacklevel=2)
+        except (OSError, UnicodeError, ValueError, EOFError):
+            continue
     return nav_files, sp3_files, clk_files
 
 
 def filter_sp3_by_date(sp3_files, target_date):
-    """Filters SP3 files for target date +/- 1 day."""
-    req_doys = [(target_date + datetime.timedelta(days=d)).strftime('%Y%j') for d in [-1, 0, 1]]
-    filtered = [f for f in sp3_files if any(d in os.path.basename(f) for d in req_doys)]
-    return filtered if filtered else sp3_files
+    """Select nominal coverage of target +/- one day, including weekly products."""
+    day = as_date(target_date)
+    start = datetime.datetime.combine(day-datetime.timedelta(days=1), datetime.time())
+    stop = start+datetime.timedelta(days=3)
+    return [p for p in sp3_files if (parse_product_name(p) is None
+                                    or parse_product_name(p).overlaps(start,stop))]
 
 
 def setup_sp3_temp(sp3_files, clk_files, target_date, sp3_prod, base_dir, suffix=""):
-    """Copies SP3/CLK files to the directory structure expected by gnsspy."""
-    temp_dir = os.path.join(base_dir, f"temp_gnsspy{suffix}")
-    if os.path.exists(temp_dir):
-        shutil.rmtree(temp_dir, ignore_errors=True)
-    os.makedirs(os.path.join(temp_dir, "sp3"), exist_ok=True)
-    os.makedirs(os.path.join(temp_dir, "clk"), exist_ok=True)
-
-    for delta in [-1, 0, 1]:
-        dt = target_date + datetime.timedelta(days=delta)
-        if isinstance(dt, datetime.datetime): dt = dt.date()
-        exp = sp3FileName(dt, product=sp3_prod)
-        doy = dt.strftime('%Y%j')
-        for f in sp3_files:
-            if doy in os.path.basename(f):
-                shutil.copy2(f, os.path.join(temp_dir, "sp3", exp))
-                break
-
-    dt_tod = target_date if isinstance(target_date, datetime.date) else target_date.date()
-    exp_clk = clockFileName(dt_tod, interval=30, product=sp3_prod)
-    for f in clk_files:
-        if dt_tod.strftime('%Y%j') in os.path.basename(f):
-            shutil.copy2(f, os.path.join(temp_dir, "clk", exp_clk))
-            break
-
-    return temp_dir
+    """Deprecated staging helper that preserves product names and compression."""
+    import tempfile
+    warnings.warn('Temporary SP3 staging is deprecated; pass product paths directly to '
+                  'sp3_interp.',DeprecationWarning,stacklevel=2)
+    temp_dir = Path(tempfile.mkdtemp(prefix='temp_gnsspy'+suffix+'_',dir=base_dir))
+    for kind,paths in [('sp3',sp3_files),('clk',clk_files)]:
+        dest = temp_dir/kind
+        dest.mkdir()
+        for path in paths:
+            target = dest/Path(path).name
+            if target.exists():
+                if target.read_bytes() != Path(path).read_bytes():
+                    raise ValueError(f'Conflicting source files named {target.name}')
+                continue
+            shutil.copy2(path,target)
+    return str(temp_dir)
 
 
 @contextmanager
 def pandas_freq_patch():
-    """Pandas 2.2+ compatibility patch: '60S' -> '60s'"""
+    """Temporarily normalise second-frequency suffixes for pandas date_range."""
     _orig = pd.date_range
     def _patched(*a, **kw):
         if 'freq' in kw and isinstance(kw['freq'], str):
@@ -255,101 +257,12 @@ def pandas_freq_patch():
 
 
 def run_sp3_interp(target_date, sp3_files, clk_files, base_dir,
-                   interval=30, poly_degree=10):
-    """Runs SP3 interpolation, returns DataFrame."""
-    sp3_prod = detect_sp3_product(sp3_files)
-    temp_dir = setup_sp3_temp(sp3_files, clk_files, target_date, sp3_prod, base_dir)
-
-    with pandas_freq_patch():
-        sp3data = sp3_interp(target_date, interval=interval, poly_degree=poly_degree,
-                             sp3_product=sp3_prod, clock_product=sp3_prod,
-                             data_dir=temp_dir)
-    return sp3data
-
-
-
-
-
-def _is_healthy(eph, sys_type):
-    """Check satellite health flag. Returns True if healthy.
-
-    GPS:      'health' == 0 → healthy
-    Galileo:  'health' bitmask == 0 → all signals OK
-    BeiDou:   'SatH1' (or fallback 'health') == 0 → healthy
-    """
-    try:
-        if sys_type == 'C':
-
-            for key in ('SatH1', 'health'):
-                if key in eph.data_vars if hasattr(eph, 'data_vars') else key in eph:
-                    return float(eph[key]) == 0.0
-            return True
-        else:
-            h = float(eph['health'])
-            return h == 0.0
-    except (KeyError, TypeError, ValueError):
-        return True
-
-
-def build_ephemeris_table(nav_files):
-    """
-    Builds a per-satellite ephemeris table from navigation files.
-    Filters out unhealthy ephemeris records (health ≠ 0).
-    Returns: {sv_str: [(toe_value, eph_xarray), ...]}  (sorted by Toe)
-    """
-    table = {}
-    skipped_unhealthy = 0
-    for f in nav_files:
-        try:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                nav = gr.load(f, use=['G', 'E', 'C'])
-            if 'sv' not in nav.coords: continue
-            for sv in nav.sv.values:
-                if not isinstance(sv, str) or len(sv) < 3: continue
-                sys_type = sv[0]
-                sv_data = nav.sel(sv=sv)
-                if 'Toe' not in sv_data.data_vars: continue
-                sv_data = sv_data.dropna(dim='time', subset=['Toe'])
-                if sv_data.time.size == 0: continue
-                if sv not in table: table[sv] = []
-                for t in sv_data.time.values:
-                    eph = sv_data.sel(time=t)
-
-                    if not _is_healthy(eph, sys_type):
-                        skipped_unhealthy += 1
-                        continue
-                    table[sv].append((float(eph['Toe']), eph))
-        except Exception:
-            pass
-
-    if skipped_unhealthy > 0:
-        print(f"       [FILTER] Skipped {skipped_unhealthy} unhealthy ephemeris records.")
-
-    for sv in table:
-        seen = set()
-        unique = []
-        for toe, eph in sorted(table[sv], key=lambda x: x[0]):
-            if toe not in seen:
-                seen.add(toe)
-                unique.append((toe, eph))
-        table[sv] = unique
-    return table
-
-
-def find_nearest_eph(eph_list, target_tow):
-    """Midpoint rule: selects the ephemeris with the closest Toe."""
-    best, best_diff = None, float('inf')
-    for toe, eph in eph_list:
-        diff = abs(target_tow - toe)
-        if diff > 302400: diff = 604800 - diff
-        if diff < best_diff:
-            best_diff = diff
-            best = (toe, eph)
-    return best
-
-
-
+                   interval=30, poly_degree=10, *, edge_policy="one-sided"):
+    """Interpolate original products directly, with no staging or renaming."""
+    return sp3_interp(target_date, interval=interval, poly_degree=poly_degree,
+                      sp3_product="auto", clock_product="auto", data_dir=base_dir,
+                      sp3_files=sp3_files, clk_files=clk_files, allow_download=False,
+                      edge_policy=edge_policy)
 
 
 SYSTEM_NAMES = {'G': 'GPS', 'E': 'Galileo', 'C': 'BeiDou'}
@@ -420,9 +333,6 @@ def parse_sv_filter(expr):
 
             selected_systems.add(sys_letter)
             continue
-
-
-
 
 
         rest_norm = rest.replace('..', ':').replace('/', '-')

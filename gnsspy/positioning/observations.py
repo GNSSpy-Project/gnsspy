@@ -60,7 +60,6 @@ def _observation_picker_by_band(station, system="G", band="L1"):
     except KeyError:
         raise ValueError("Unknown Satellite System:", system, "OPTIONS: G-R-E-C-J-R-I-S")
 
-    
 
     if station.version.startswith("3"):
         observation_codes = station.observation.columns.tolist()
@@ -99,7 +98,6 @@ def gnssDataframe(station, orbit, system="G+R+E+C+J+I+S", cut_off=7.0):
     gnss = gnss.loc[gnss['Elevation'] > cut_off]
     gnss["Tropo"] = tropospheric_delay(station.approx_position[0],station.approx_position[1],station.approx_position[2], gnss.Elevation, station.epoch)
     return gnss
-
 
 
 build_gnss_dataframe = gnssDataframe

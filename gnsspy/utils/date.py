@@ -1,6 +1,3 @@
-
-
-
 """Date and GNSS time helper functions for GNSSpy."""
 
 import datetime
@@ -42,10 +39,9 @@ def parse_date(date):
 
 
 def gpsweekday(date, Datetime=False):
-    """Return GPS week and concatenated GPS week/day code.
+    """Return the GPS week and concatenated GPS week/day code.
 
-    The legacy ``Datetime`` argument is retained for backwards compatibility;
-    date parsing now depends on the actual input type instead.
+    Date parsing follows the input type. Datetime is accepted for compatibility.
     """
     start = datetime.date(year=1980, month=1, day=6)
     date = parse_date(date)

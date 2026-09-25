@@ -1,11 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-brdc_timeseries.py
-==================
-Day-long time series analysis of BRDC vs SP3 orbit differences.
-For each epoch, the ephemeris with the nearest Toe is selected (midpoint rule).
-Generates interactive Plotly HTML charts (compatible with gnsspy plot.py style).
+
+"""Daily BRDC-SP3 orbit comparisons and interactive time-series plots.
+
+Ephemerides are selected by the nearest Toe for each target epoch.
 """
 import os, datetime, webbrowser
 import numpy as np
@@ -19,22 +16,10 @@ from pathlib import Path
 from gnsspy.orbit import comparison as orbit_utils
 
 
-
-
-
-
-
 _MAX_DIFF_M = 100.0
 
 
-
 _MAX_TK_SEC = 7200
-
-
-
-
-
-
 
 
 _MAD_K = 6.0
@@ -44,17 +29,19 @@ _MAD_FLOOR_M = 5.0
 from gnsspy.cli import download as dn
 
 
-
-
-
 def compute_day_timeseries(nav_files, sp3_files, clk_files, target_date,
                            interval=30, sv_filter=None):
     """Day-long BRDC vs SP3 comparison. Returns: {sv: DataFrame}.
 
     sv_filter: result of orbit_utils.parse_sv_filter() — None means all SVs.
+    target_date and SP3 epoch labels are interpreted as GPST, not UTC.
     """
 
-    print(f"\n[1/3] SP3 interpolasyonu (interval={interval}s, poly=16)...")
+    if not nav_files:
+        raise ValueError("At least one navigation file is required")
+    if not np.isfinite(interval) or interval <= 0:
+        raise ValueError("interval must be positive seconds")
+    print(f"\n[1/3] SP3 interpolation (interval={interval}s, poly=16)...")
     base_dir = os.path.dirname(nav_files[0])
 
     sp3data = orbit_utils.run_sp3_interp(target_date, sp3_files, clk_files, base_dir, interval=interval, poly_degree=16)
@@ -92,11 +79,12 @@ def compute_day_timeseries(nav_files, sp3_files, clk_files, target_date,
         for epoch in day_epochs:
             epoch_dt = epoch.to_pydatetime()
             tow = orbit_utils.datetime_to_gps_tow(epoch_dt)
-            nearest = orbit_utils.find_nearest_eph(sv_ephs, tow)
+            nearest = orbit_utils.find_nearest_eph(
+                sv_ephs, tow, target_epoch=epoch_dt, sys_type=sys_type)
             if nearest is None: continue
             toe_used, eph = nearest
-            tk = abs(tow - toe_used)
-            if tk > 302400: tk = 604800 - tk
+            tk = abs(orbit_utils.ephemeris_age_seconds(
+                eph, tow, target_epoch=epoch_dt, sys_type=sys_type))
 
             if tk > _MAX_TK_SEC:
                 skipped_tk += 1
@@ -147,7 +135,7 @@ def compute_day_timeseries(nav_files, sp3_files, clk_files, target_date,
 
     if skipped_tk > 0:
         print(f"       [FILTER-1] Dropped {skipped_tk} epochs outside "
-              f"|tk| <= {_MAX_TK_SEC}s ephemeris validity window.")
+              f"|tk| <= {_MAX_TK_SEC}s configured ephemeris age limit.")
     if skipped_hard > 0:
         print(f"       [FILTER-2] Dropped {skipped_hard} epochs with "
               f"|diff| > {_MAX_DIFF_M:.0f} m (hard ceiling).")
@@ -156,9 +144,6 @@ def compute_day_timeseries(nav_files, sp3_files, clk_files, target_date,
               f"outliers (K={_MAD_K}, floor={_MAD_FLOOR_M:.0f} m).")
     print(f"       Time series created for {len(results)} satellites.")
     return results
-
-
-
 
 
 def plot_satellite(df, sv, target_date, save_dir=None):
@@ -171,26 +156,26 @@ def plot_satellite(df, sv, target_date, save_dir=None):
     for i, (ax, key, color, label) in enumerate(zip(axes, keys, colors, labels)):
         data = df[key]
         rms = np.sqrt(np.mean(data**2))
-        
+
         ax.plot(df['epoch'], data, color=color, linewidth=1.2, label=label)
-        
+
         if key != 'd3d':
             stat_txt = f'Mean: {np.mean(data):.2f} | Std: {np.std(data):.2f} | RMS: {rms:.2f}'
         else:
             stat_txt = f'Mean: {np.mean(data):.2f} | Max: {np.max(data):.2f} | RMS: {rms:.2f}'
-        
+
         ax.text(0.01, 0.92, stat_txt, transform=ax.transAxes, fontsize=10,
                 verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
-        
+
 
         changes = df['toe_used'].diff().fillna(0) != 0
         for idx in df[changes].index:
             ax.axvline(x=df.loc[idx, 'epoch'], color='red', linestyle='--', linewidth=0.8, alpha=0.4)
-            
+
         ax.set_ylabel(label, fontsize=11)
         ax.grid(True, linestyle=':', alpha=0.6)
-        
-    axes[-1].set_xlabel("UTC Time", fontsize=11)
+
+    axes[-1].set_xlabel("GPST Time", fontsize=11)
     axes[-1].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     fig.suptitle(f'{sv} -- BRDC vs SP3 Orbit Differences ({target_date})', fontsize=14, fontweight='bold')
 
@@ -207,16 +192,16 @@ def plot_system_rms(results, target_date, system='G', save_dir=None):
     """Per-satellite 3D RMS bar chart (Matplotlib PNG)."""
     svs = sorted([sv for sv in results if sv.startswith(system)])
     if not svs: return None
-    
+
     rms_vals = [np.sqrt(np.mean(results[sv]['d3d']**2)) for sv in svs]
     sys_name = orbit_utils.SYSTEM_NAMES.get(system, system)
     median_val = np.median(rms_vals)
-    
+
     plt.figure(figsize=(10, 6))
     colors = ['firebrick' if v > 5 else 'seagreen' if v < 2 else 'goldenrod' for v in rms_vals]
     bars = plt.bar(svs, rms_vals, color=colors, edgecolor='black', alpha=0.8)
     plt.axhline(y=median_val, color='royalblue', linestyle='--', linewidth=1.5, label=f'Median: {median_val:.2f} m')
-    
+
     plt.title(f'{sys_name} -- Per-Satellite 3D RMS ({target_date})', fontsize=14)
     plt.xlabel("Satellite PRN", fontsize=12)
     plt.ylabel("3D RMS Error (m)", fontsize=12)
@@ -238,26 +223,26 @@ def plot_all_satellites_overlay(results, target_date, system='G', save_dir=None)
     """Time evolution overlay for all satellites (Matplotlib PNG)."""
     svs = sorted([sv for sv in results if sv.startswith(system)])
     if not svs: return None
-    
+
     sys_name = orbit_utils.SYSTEM_NAMES.get(system, system)
     axes_labels = ['dX (m)', 'dY (m)', 'dZ (m)']
     keys = ['dx', 'dy', 'dz']
 
     fig, axes = plt.subplots(3, 1, figsize=(12, 10), sharex=True, constrained_layout=True)
-    
+
     colors = plt.get_cmap('tab20').colors
-    
+
     for i, (ax, key, label) in enumerate(zip(axes, keys, axes_labels)):
         for j, sv in enumerate(svs):
             df = results[sv]
             ax.plot(df['epoch'], df[key], linewidth=0.8, color=colors[j % len(colors)], label=sv if i == 0 else "")
-            
+
         ax.set_ylabel(label, fontsize=11)
         ax.grid(True, linestyle=':', alpha=0.6)
         if i == 0:
             ax.legend(loc='upper right', fontsize=8, ncol=6, frameon=True, framealpha=0.8)
-            
-    axes[-1].set_xlabel("UTC Time", fontsize=11)
+
+    axes[-1].set_xlabel("GPST Time", fontsize=11)
     axes[-1].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     fig.suptitle(f'{sys_name} -- All Satellites Orbit Comparison ({target_date})', fontsize=14, fontweight='bold')
 
@@ -274,7 +259,7 @@ def plot_all_coords_compare(results, target_date, system='G', save_dir=None):
     """BRDC vs SP3 coordinate comparison (Matplotlib PNG per satellite)."""
     svs = sorted([sv for sv in results if sv.startswith(system)])
     if not svs: return
-    
+
     fig_dir = os.path.join(save_dir, f"coords_{system}") if save_dir else None
     if fig_dir: Path(fig_dir).mkdir(parents=True, exist_ok=True)
 
@@ -283,7 +268,7 @@ def plot_all_coords_compare(results, target_date, system='G', save_dir=None):
         fig, axes = plt.subplots(3, 1, figsize=(10, 10), sharex=True, constrained_layout=True)
         axes_names = ['x', 'y', 'z']
         labels = ['X (km)', 'Y (km)', 'Z (km)']
-        
+
         for i, (ax, name, label) in enumerate(zip(axes, axes_names, labels)):
             brdc_km = df[f'brdc_{name}'] / 1000.0
             sp3_km = df[f'sp3_{name}'] / 1000.0
@@ -292,11 +277,11 @@ def plot_all_coords_compare(results, target_date, system='G', save_dir=None):
             ax.set_ylabel(label, fontsize=11)
             ax.grid(True, linestyle=':', alpha=0.6)
             if i == 0: ax.legend()
-            
-        axes[-1].set_xlabel("UTC Time", fontsize=11)
+
+        axes[-1].set_xlabel("GPST Time", fontsize=11)
         axes[-1].xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
         fig.suptitle(f'{sv} -- BRDC vs SP3 Coordinate Comparison ({target_date})', fontsize=13)
-        
+
         if fig_dir:
             plt.savefig(os.path.join(fig_dir, f"coords_{sv}.png"), dpi=300)
         plt.close()
@@ -315,18 +300,15 @@ def plot_all_diffs(results, target_date, system='G', save_dir=None):
         plot_satellite(results[sv], sv, target_date, fig_dir)
 
 
-
-
-
 def main(out_dir=None, skip_download=None, auth=None):
     dn.print_header("BRDC vs SP3 TIME SERIES ANALYSIS")
-    
+
 
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-    
+
     if skip_download is None:
         skip_download = dn.get_yes_no("Do you have pre-downloaded GNSS (Nav + SP3) files? (Yes to SKIP download)", False)
-    
+
     if skip_download:
         if out_dir is None:
             out_dir = dn.get_input("Data directory", data_dir)
@@ -337,11 +319,11 @@ def main(out_dir=None, skip_download=None, auth=None):
         else:
             username, password = auth
         if not username: return
-        
+
         date_start, date_end = dn.get_date_range()
         stations = dn.get_stations()
         rinex = dn.get_rinex_version()
-        
+
         dn.print_info("REQUIRED FOR ANALYSIS: Navigation/BRDC and SP3+CLK")
         ftypes = {
             'observation': False,
@@ -351,11 +333,11 @@ def main(out_dir=None, skip_download=None, auth=None):
             'ionosphere': False,
             'sp3_center': 'CODE'
         }
-        
+
         if out_dir is None:
             out_dir = data_dir
         Path(out_dir).mkdir(parents=True, exist_ok=True)
-        
+
         dn.show_summary(date_start, date_end, stations, rinex, ftypes, out_dir)
         if dn.get_yes_no("\nStart download?", True):
             dn.download_data(date_start, date_end, stations, rinex, ftypes, out_dir, username, password)
@@ -407,7 +389,7 @@ def main(out_dir=None, skip_download=None, auth=None):
 
     save_dir = os.path.join(out_dir, "data", "figures")
     os.makedirs(save_dir, exist_ok=True)
-    
+
 
     all_rows = []
     for sv, df in results.items():
@@ -418,12 +400,12 @@ def main(out_dir=None, skip_download=None, auth=None):
 
             rec['Epoch'] = rec.pop('epoch').strftime('%Y-%m-%d %H:%M:%S')
             all_rows.append(rec)
-    
+
 
     df_export = pd.DataFrame(all_rows)
     cols = ['PRN', 'Epoch'] + [c for c in df_export.columns if c not in ['PRN', 'Epoch']]
     df_export = df_export[cols]
-    
+
     excel_name = os.path.join(out_dir, "data", f"timeseries_{target_date}.xlsx")
     df_export.to_excel(excel_name, index=False)
     print(f"\n[SAVE] Excel: {excel_name}")

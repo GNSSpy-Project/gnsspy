@@ -9,8 +9,8 @@ class Observation:
     def __init__(self, filename=None, epoch=None, observation=None, approx_position=None,
                  receiver_type=None, antenna_type=None, interval=None,
                  receiver_clock=None, version=None, observation_types=None):
-        self.filename          = filename 
-        self.epoch             = epoch 
+        self.filename          = filename
+        self.epoch             = epoch
         self.observation       = observation
         self.approx_position   = approx_position
         self.receiver_type     = receiver_type
@@ -32,26 +32,25 @@ class _ObservationTypes:
         self.SBAS    = ToB_SBAS
 
 
-
 class Navigation:
     """
-    Navigation class for RINEX Observation (*.*n/p) files
+    Navigation class for RINEX navigation files
     """
-    def __init__(self, epoch = None, navigation = None, version = None):
+    def __init__(self, epoch = None, navigation = None, version = None, *, metadata=None):
         self.epoch           = epoch
         self.navigation      = navigation
         self.version         = version
-
+        self.metadata        = {} if metadata is None else metadata
 
 
 class Navigation_DEPRECATED:
     """
     Broadcast Ephemeris in RINEX file
     """
-    def __init__(self, PRN=None, epoch=None, roota=None, toe=None, 
-                 m0=None, e=None, delta_n=None, smallomega=None, 
-                 cus=None, cuc=None, crs=None, crc=None, cis=None, 
-                 cic=None, idot=None, i0=None, bigomega0=None, 
+    def __init__(self, PRN=None, epoch=None, roota=None, toe=None,
+                 m0=None, e=None, delta_n=None, smallomega=None,
+                 cus=None, cuc=None, crs=None, crc=None, cis=None,
+                 cic=None, idot=None, i0=None, bigomega0=None,
                  bigomegadot=None):
         self.PRN         = PRN
         self.epoch       = epoch
@@ -71,8 +70,6 @@ class Navigation_DEPRECATED:
         self.i0          = i0
         self.bigomega0   = bigomega0
         self.bigomegadot = bigomegadot
-
-
 
 
 class PEphemeris:

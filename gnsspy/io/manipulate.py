@@ -1,6 +1,3 @@
-
-
-
 """RINEX file manipulation utilities."""
 
 
@@ -90,8 +87,6 @@ def _find_crx2rnx_executable():
             return found
 
 
-
-
     if sys.platform == "darwin":
         return None
 
@@ -164,52 +159,36 @@ def crx2rnx(rinexFile, output_dir=None, check=True):
     return result
 
 
-
-
-
 def standardize_snr(station_data, system='G'):
+    """Legacy S1C/S1 aliases, with explicit source provenance.
+
+    New plotting functions do not need this helper. Existing measured columns
+    are never overwritten. Any newly created alias is marked in DataFrame.attrs
+    so the plotting selector cannot confuse it with a native RINEX measurement.
+    A separate native code is selected per satellite, without epoch filling.
     """
-    Map available system-specific SNR columns to GNSSpy's standard SNR aliases.
-
-    Different satellite systems can store signal strength with different RINEX
-    observation codes (for example ``S2I`` for some BeiDou observations). This
-    function creates the aliases ``S1C`` and ``S1`` where possible so older
-    GNSSpy functions can operate on multi-GNSS datasets.
-    """
-    if station_data is None or not hasattr(station_data, 'observation'):
+    import warnings
+    import numpy as np
+    import pandas as pd
+    from gnsspy.visualization._observations import observations, select_snr, snr_values
+    if station_data is None or not hasattr(station_data, 'observation') or station_data.observation.empty:
         return station_data
-
-    obs_df = station_data.observation
-    if obs_df.empty:
+    warnings.warn('standardize_snr is a legacy alias helper. Native plotting functions select measured '
+                  'S-codes directly; no standardisation is required.', DeprecationWarning, stacklevel=2)
+    selected = observations(station_data, system)
+    try:
+        choices, _, _ = select_snr(selected)
+    except RuntimeError:
         return station_data
-
-    existing_cols = list(obs_df.columns)
-    snr_cols = [c for c in existing_cols if c.startswith('S')]
-    if not snr_cols:
-        return station_data
-
-    target_snr = None
-    if system == 'C':
-        priority_list = ['S2I', 'S1I', 'S2X', 'S7I', 'S6I', 'S1C']
-    elif system == 'E':
-        priority_list = ['S1C', 'S1X', 'S5Q', 'S7Q', 'S8Q']
-    elif system == 'R':
-        priority_list = ['S1C', 'S1P', 'S2C', 'S2P']
-    else:
-        priority_list = ['S1C', 'S1', *snr_cols]
-
-    for p in priority_list:
-        if p in snr_cols:
-            target_snr = p
-            break
-
-    if not target_snr and snr_cols:
-        target_snr = snr_cols[0]
-
-    if target_snr:
-        if 'S1C' not in existing_cols:
-            station_data.observation['S1C'] = station_data.observation[target_snr]
-        if 'S1' not in existing_cols:
-            station_data.observation['S1'] = station_data.observation[target_snr]
-
+    values = pd.Series(np.nan, index=selected.index, dtype=float)
+    for sv, code in choices.items():
+        group = selected.xs(sv, level='SV', drop_level=False)
+        values.loc[group.index] = snr_values(group, code)
+    target = station_data.observation
+    provenance = dict(target.attrs.get('gnsspy_snr_aliases', {}))
+    for alias in ('S1C', 'S1'):
+        if alias not in target.columns:
+            target[alias] = values.reorder_levels(target.index.names).reindex(target.index)
+            provenance[alias] = dict(choices)
+    target.attrs['gnsspy_snr_aliases'] = provenance
     return station_data

@@ -44,7 +44,7 @@ class EarthdataSession(requests.Session):
 
 class BaseDownloader:
     """Base class for all downloaders to inherit from"""
-    
+
     def __init__(self, username, password, output_dir):
         self.username = username
         self.password = password
@@ -54,82 +54,87 @@ class BaseDownloader:
 
         self.session = EarthdataSession(username, password)
         self.session.max_redirects = 10
-        
+
 
         self.timeout = 120
-        
+
 
         self.debug = False
-    
+
     def day_of_year(self, date):
         """Day of year (001-366)"""
         return date.timetuple().tm_yday
-    
+
     def parse_date(self, date_str):
         """Convert common GNSSpy date inputs to ``datetime.date``."""
         return _parse_date(date_str)
-    
+
     def download_file(self, url, filepath):
+        """Atomic download; never label cache reuse as a network transfer.
+
+        A failed HTTP/HTML/short/invalid response does not create or overwrite
+        the destination. Precise products receive a lightweight header/data check.
         """
-        Download file (using session)
-        
-        Returns:
-            tuple: (success, message)
-        """
+        import os
+        import tempfile
+        from gnsspy.utils.product_files import product_kind, validate_product_file
+        filepath = Path(filepath)
+        kind = product_kind(filepath)
+        from gnsspy.utils.ionex_files import is_ionex_path
+        ionex = is_ionex_path(filepath)
+
+        def valid_ionex(candidate):
+            from gnsspy.data_access.ionosphere import validate_ionex_payload
+            try:
+                validate_ionex_payload(candidate, expected_name=filepath)
+                return True
+            except (OSError, ValueError, ImportError, EOFError):
+                return False
+        temporary = None
         try:
+            if filepath.is_file() and filepath.stat().st_size:
+                usable = (validate_product_file(filepath,kind) if kind else
+                          valid_ionex(filepath) if ionex else filepath.stat().st_size >= 1000)
+                if usable:
+                    return True,f"Reused locally (no download): {filepath}"
             if self.debug:
                 print(f"  [DEBUG] URL: {url}")
-            
+            with self.session.get(url,timeout=self.timeout,allow_redirects=True) as response:
+                status = response.status_code
+                if status != 200:
+                    messages = {404:'File not found (404)',401:'Authorization error (401)',
+                                403:'Access denied (403 - CDDIS authorization required)'}
+                    return False,messages.get(status,f'HTTP {status}')
+                content = response.content
+                content_type = response.headers.get('content-type','').lower()
+                lead = content.lstrip()[:256].lower()
+                if 'html' in content_type or lead.startswith((b'<!doctype html',b'<html')):
+                    return False,'HTML login/error page returned, not product data'
+                if not content or (not kind and not ionex and len(content) < 1000):
+                    return False,f'File too small ({len(content)} bytes)'
+                filepath.parent.mkdir(parents=True,exist_ok=True)
 
-            response = self.session.get(
-                url, 
-                timeout=self.timeout,
-                allow_redirects=True
-            )
-            
-            if self.debug:
-                print(f"  [DEBUG] Status: {response.status_code}")
-                print(f"  [DEBUG] Content-Type: {response.headers.get('content-type', 'N/A')}")
-                print(f"  [DEBUG] Content-Length: {len(response.content)} bytes")
-            
-            if response.status_code == 404:
-                return False, "File not found (404)"
-            
-            if response.status_code == 401:
-                return False, "Authorization error (401)"
-            
-            if response.status_code == 403:
-                return False, "Access denied (403 - CDDIS authorization required)"
-            
-            if response.status_code != 200:
-                return False, f"HTTP {response.status_code}"
-            
 
-            content_type = response.headers.get('content-type', '').lower()
-            if 'html' in content_type or 'text/html' in content_type:
-                if self.debug:
-                    print(f"  [DEBUG] HTML Response (first 300 characters):")
-                    print(f"  {response.text[:300]}")
-                return False, "File not found (HTML page returned)"
-            
-
-            with open(filepath, 'wb') as f:
-                f.write(response.content)
-            
-
-            size = filepath.stat().st_size
-            
-            if size < 1000:
-                return False, f"File too small ({size} bytes)"
-            
-            size_mb = size / (1024 * 1024)
-            return True, f"{size_mb:.2f} MB"
-        
+                fd,name = tempfile.mkstemp(prefix='.'+filepath.name+'.',suffix='.part'+filepath.suffix,
+                                           dir=filepath.parent)
+                temporary = Path(name)
+                with os.fdopen(fd,'wb') as stream:
+                    stream.write(content)
+                if kind and not validate_product_file(temporary,kind):
+                    return False,f'Invalid {kind.upper()} response (header/data check failed)'
+                if ionex and not valid_ionex(temporary):
+                    return False, 'Invalid IONEX response (complete GIM parsing/content-date check failed)'
+                os.replace(temporary,filepath)
+                temporary = None
+                return True,f'Downloaded {len(content)/(1024*1024):.2f} MB: {filepath}'
         except requests.exceptions.ConnectionError:
-            return False, "Connection error: Check your internet connection"
-        
+            return False,'Connection error: check the network'
         except requests.exceptions.Timeout:
-            return False, "Timeout"
-        
-        except Exception as e:
-            return False, f"Unknown error: {str(e)}"
+            return False,'Timeout'
+        except requests.exceptions.TooManyRedirects:
+            return False,'Too many redirects (check Earthdata authentication)'
+        except (OSError,ValueError) as exc:
+            return False,f'Download error: {exc}'
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)

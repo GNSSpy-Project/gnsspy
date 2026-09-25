@@ -20,16 +20,6 @@ from __future__ import annotations
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 
-
-
-
-
-
-
-
-
-
-
 GLONASS_FREQ_CHANNELS: Dict[str, int] = {
     "R01":  1, "R02": -4, "R03":  5, "R04":  6,
     "R05":  1, "R06": -4, "R07":  5, "R08":  6,
@@ -40,30 +30,6 @@ GLONASS_FREQ_CHANNELS: Dict[str, int] = {
 
     "R25":  6, "R26": -5,
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 _R3_TO_R2_PRESEED_GPS = {
@@ -116,15 +82,6 @@ def r3_to_r2_code(system: str, code3: str) -> Optional[str]:
     if t in "CLDS" and b in "12345678":
         return t + b
     return None
-
-
-
-
-
-
-
-
-
 
 
 _DEFAULT_ATTR_GPS = {
@@ -211,7 +168,6 @@ def r2_to_r3_code(system: str, code2: str, r2_set: Set[str]) -> Optional[str]:
     type_char, band = code2[0], code2[1]
     if type_char not in "CLDSP" or band not in "12345678":
         return None
-
 
 
     out_type = "C" if type_char == "P" else type_char

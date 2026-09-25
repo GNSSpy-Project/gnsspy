@@ -13,7 +13,7 @@ from gnsspy.utils.constants import _system_name
 
 def read_obsFile(observationFile):
     if observationFile.endswith(".Z")==True:
-        raise ValueError("All I/O functions take uncompressed files as an input (remove .Z/.gz from filename) | Next release will include this feature...")
+        raise ValueError("read_obsFile requires an uncompressed RINEX observation file. Decompress the file before reading.")
 
     isexist(observationFile)
 
@@ -62,10 +62,10 @@ def read_obsFile_v2(observationFile):
             break
         else:
             line += 1
-    
+
     del obsLines[0:line]
 
-    obsLines = [lines.rstrip() for lines in obsLines] 
+    obsLines = [lines.rstrip() for lines in obsLines]
     obsList = []
     SVList= []
     epochList = []
@@ -95,7 +95,7 @@ def read_obsFile_v2(observationFile):
             year += 2000
         else:
             raise ValueError('Observation year is not recognized! | Program stopped!')
-        epoch = datetime.datetime(year = year, 
+        epoch = datetime.datetime(year = year,
                                 month =int(obsLines[0][4:6]),
                                 day =int(obsLines[0][7:9]),
                                 hour = int(obsLines[0][10:12]),
@@ -111,7 +111,7 @@ def read_obsFile_v2(observationFile):
                     print(obsLines[0])
                     del obsLines[0]
                     line += 1
-                else: 
+                else:
                     break
 
         if len(obsLines[0]) == 80:
@@ -138,7 +138,7 @@ def read_obsFile_v2(observationFile):
         obsEpoch = []
         del obsLines[0]
         rowNumber = np.ceil(obsNumber/5).astype('int')
-        for i in range(0, rowNumber*NoSV, rowNumber): 
+        for i in range(0, rowNumber*NoSV, rowNumber):
             for j in range(0, rowNumber):
                 lineLenght = len(obsLines[i+j])
                 if lineLenght != 80:
@@ -308,7 +308,7 @@ def read_obsFile_v3(obsFileName):
             epochLine = obsLines[0][1:].split()
             if len(epochLine) == 8:
                 epoch_year, epoch_month, epoch_day, epoch_hour, epoch_minute, epoch_second, epoch_flag, epoch_SVNumber = obsLines[0][1:].split()
-                receiver_clock = 0 
+                receiver_clock = 0
             elif len(epochLine) == 9:
                 epoch_year, epoch_month, epoch_day, epoch_hour, epoch_minute, epoch_second, epoch_flag, epoch_SVNumber, receiver_clock = obsLines[0][1:].split()
             else: raise ValueError("Unexpected epoch line format detected! | Program stopped!")
@@ -326,11 +326,11 @@ def read_obsFile_v3(obsFileName):
                 elif 'SYS / PHASE SHIFT' in obsLines[0]:
                     del obsLines[0]
 
-                else: 
+                else:
                     break
         else:
 
-            epoch = datetime.datetime(year = int(epoch_year), 
+            epoch = datetime.datetime(year = int(epoch_year),
                                     month = int(epoch_month),
                                     day = int(epoch_day),
                                     hour = int(epoch_hour),
@@ -369,7 +369,7 @@ def read_obsFile_v3(obsFileName):
     columnNames = np.append(ToB,'Epoch')
     obs = pd.DataFrame(obsList, index=svList, columns=columnNames)
     obs.index.name = 'SV'
-    obs['epoch'] = obs.Epoch 
+    obs['epoch'] = obs.Epoch
     obs['Epoch'] = obs.Epoch
     obs.set_index('Epoch', append=True, inplace=True)
     obs = obs.reorder_levels(['Epoch', 'SV'])

@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
-"""
-gnss_downloader.py
-
-GNSS Data Downloader - Interactive CLI
-User-friendly terminal interface tool for downloading GNSS data.
-Connects to the backend modules to perform robust downloads.
-
-CRITICAL FIX: SP3 downloads now use ONLY the selected center for ALL dates
-(main date + previous day + next day buffer).
-"""
+"""Interactive command-line interface for GNSS data acquisition."""
 
 import sys
 import getpass
@@ -194,7 +185,7 @@ def get_date_range():
     """Gets start and end date from user."""
     print_header("DATE RANGE")
     print_info("Formats: DD-MM-YYYY, YYYY-MM-DD")
-    
+
     while True:
         try:
             start_str = get_input("Start date")
@@ -202,7 +193,7 @@ def get_date_range():
             break
         except ValueError as e:
             print_error(str(e))
-    
+
     date_end = None
     if get_yes_no("Do you want to use a date range?", False):
         while True:
@@ -215,10 +206,10 @@ def get_date_range():
                 break
             except ValueError as e:
                 print_error(str(e))
-        
+
         days = (date_end - date_start).days + 1
         print_info(f"Total {days} days selected.")
-    
+
     return date_start, date_end
 
 
@@ -226,18 +217,18 @@ def get_stations():
     """Gets list of station codes."""
     print_header("STATION SELECTION")
     print_info("Enter codes separated by commas (e.g., MATE,ANKR). Use BRDC for global.")
-    
+
     while True:
         station_input = get_input("Station codes")
         if not station_input:
             print_error("Enter at least one station!")
             continue
-        
+
         stations = [s.strip().upper() for s in station_input.split(',') if s.strip()]
         if not stations:
             print_error("No valid code found!")
             continue
-        
+
         print_success(f"Selected: {', '.join(stations)}")
         return stations
 
@@ -260,13 +251,13 @@ def get_file_types():
     types['brdc'] = get_yes_no("3. BRDC (Merged)", True)
     types['sp3_clk'] = get_yes_no("4. SP3 + CLK (Precise Orbit/Clock)", True)
     types['ionosphere'] = get_yes_no("5. Ionosphere", False)
-    
+
     if types['sp3_clk']:
         print()
         print_info("SP3 Analysis Center selection:")
         for i, (key, info) in enumerate(SP3_CENTERS.items(), 1):
             print(f"  {i}. {key}: {info['description']}")
-        
+
         while True:
             center = get_input("Analysis Center", "CODE").upper()
             if center in SP3_CENTERS or center in ['COD', 'CODE']:
@@ -274,7 +265,7 @@ def get_file_types():
                 break
             else:
                 print_error(f"Invalid! Options: {', '.join(SP3_CENTERS.keys())}")
-    
+
     return types
 
 
@@ -283,10 +274,10 @@ def get_output_directory():
     print_header("OUTPUT DIRECTORY")
     default_dir = DEFAULT_OUTPUT_DIR
     print_info(f"Default: {default_dir}")
-    
+
     if get_yes_no("Use default directory?", True):
         return default_dir
-    
+
     while True:
         custom_dir = get_input("Output directory")
         if not custom_dir: continue
@@ -303,16 +294,16 @@ def show_summary(date_start, date_end, stations, rinex_version, file_types, outp
     print(f"{Colors.BOLD}Date:{Colors.ENDC} {date_start}", end="")
     if date_end: print(f" -> {date_end}")
     else: print(" (Single day)")
-    
+
     print(f"{Colors.BOLD}Stations:{Colors.ENDC} {', '.join(stations)}")
     print(f"{Colors.BOLD}RINEX:{Colors.ENDC} {rinex_version}")
     print(f"{Colors.BOLD}Output:{Colors.ENDC} {output_dir}")
-    
+
     print(f"\n{Colors.BOLD}Selected Files:{Colors.ENDC}")
     if file_types['observation']: print(f"  {Colors.GREEN}+{Colors.ENDC} Observation")
     if file_types['navigation']: print(f"  {Colors.GREEN}+{Colors.ENDC} Navigation")
     if file_types['brdc']: print(f"  {Colors.GREEN}+{Colors.ENDC} BRDC")
-    if file_types['sp3_clk']: 
+    if file_types['sp3_clk']:
         print(f"  {Colors.GREEN}+{Colors.ENDC} SP3+CLK ({file_types.get('sp3_center')})")
         print(f"    {Colors.YELLOW}Note: Will download for selected center ONLY (main + buffer days){Colors.ENDC}")
     if file_types['ionosphere']: print(f"  {Colors.GREEN}+{Colors.ENDC} Ionosphere")
@@ -322,7 +313,7 @@ def show_summary(date_start, date_end, stations, rinex_version, file_types, outp
 def download_data(date_start, date_end, stations, rinex_version, file_types, output_dir, username, password):
     """Orchestrates the download process."""
     print_header("DOWNLOAD STARTING")
-    
+
 
     date_list = []
     current = date_start
@@ -330,37 +321,36 @@ def download_data(date_start, date_end, stations, rinex_version, file_types, out
     while current <= limit:
         date_list.append(current)
         current += datetime.timedelta(days=1)
-    
+
 
     sp3_date_list = []
     if file_types.get('sp3_clk', False):
         sp3_date_list.append(date_start - datetime.timedelta(days=1))
         sp3_date_list.extend(date_list)
         sp3_date_list.append(limit + datetime.timedelta(days=1))
-        
+
         center_name = file_types.get('sp3_center', 'CODE')
-        print_info(f"SP3: Downloading {len(sp3_date_list)} days from '{center_name}' ONLY")
+        print_info(f"SP3: Resolving {len(sp3_date_list)} days from '{center_name}' ONLY")
         print_info(f"     Range: {sp3_date_list[0]} to {sp3_date_list[-1]}")
-    
+
 
     obs_dl = ObservationDownloader(username, password, output_dir)
     nav_dl = NavigationDownloader(username, password, output_dir)
-    
+
 
     stats = {k: {'success': 0, 'fail': 0} for k in ['observation', 'navigation', 'brdc', 'sp3_clk', 'ionosphere']}
+    precise_actions = {'downloaded': 0, 'reused': 0, 'missing': 0, 'disabled': 0}
     total_ops = 0
-    
+
 
     if file_types['observation']: total_ops += len(stations) * len(date_list)
     if file_types['navigation']: total_ops += len(stations) * len(date_list)
     if file_types['brdc']: total_ops += len(date_list)
     if file_types['sp3_clk']: total_ops += len(sp3_date_list)
     if file_types['ionosphere']: total_ops += len(date_list)
-    
-    current_op = 0
-    
 
-    
+    current_op = 0
+
 
     if file_types['observation']:
         print(f"\n{Colors.BOLD}OBSERVATION{Colors.ENDC}")
@@ -409,12 +399,12 @@ def download_data(date_start, date_end, stations, rinex_version, file_types, out
     if file_types['sp3_clk']:
         center = file_types.get('sp3_center', 'CODE')
         print(f"\n{Colors.BOLD}SP3 + CLK (CENTER: {center} STRICT MODE){Colors.ENDC}")
-        print_warning(f"Only '{center}' will be used for ALL {len(sp3_date_list)} days (no fallback)")
-        
+        print_warning(f"Centre is fixed to {center}; auto chooses available FIN, RAP, then ULT products.")
+
         for date in sp3_date_list:
             current_op += 1
             print(f"[{current_op}/{total_ops}] {center} @ {date}... ", end="", flush=True)
-            
+
             success, msg, mode = nav_dl.download_sp3_with_fallback(
                 center=center,
                 date=date,
@@ -423,7 +413,11 @@ def download_data(date_start, date_end, stations, rinex_version, file_types, out
                 rinex_version=rinex_version,
                 strict_center=True
             )
-            
+
+            result = nav_dl.last_precise_result
+            if result is not None:
+                for item in (result.sp3,result.clk):
+                    precise_actions[item.action] += 1
             if success:
                 print_success(f"{msg} [{mode}]")
                 stats['sp3_clk']['success'] += 1
@@ -449,12 +443,16 @@ def download_data(date_start, date_end, stations, rinex_version, file_types, out
     print_header("DOWNLOAD REPORT")
     total_success = sum(s['success'] for s in stats.values())
     total_fail = sum(s['fail'] for s in stats.values())
-    
+
     for k, v in stats.items():
         if v['success'] + v['fail'] > 0:
             print(f"{k.upper()}: {Colors.GREEN}{v['success']} OK{Colors.ENDC}, {Colors.RED}{v['fail']} Fail{Colors.ENDC}")
-    
+
     print(f"\n{Colors.BOLD}Total:{Colors.ENDC} {Colors.GREEN}{total_success} Success{Colors.ENDC}, {Colors.RED}{total_fail} Failed{Colors.ENDC}")
+    if file_types.get('sp3_clk'):
+        print(f"Precise files: {precise_actions['downloaded']} downloaded, "
+              f"{precise_actions['reused']} reused locally, {precise_actions['missing']} missing.")
+        print("SP3/CLK OK counts product availability, not the number of network downloads.")
     print(f"{Colors.BOLD}Output Directory:{Colors.ENDC} {output_dir}")
 
 def main():
@@ -462,21 +460,21 @@ def main():
         print_header("GNSS DATA DOWNLOADER")
         username, password = login_flow()
         if not username: return
-        
+
         date_start, date_end = get_date_range()
         stations = get_stations()
         rinex = get_rinex_version()
         ftypes = get_file_types()
         out_dir = get_output_directory()
-        
+
         show_summary(date_start, date_end, stations, rinex, ftypes, out_dir)
-        
+
         if get_yes_no("\nStart download?", True):
             download_data(date_start, date_end, stations, rinex, ftypes, out_dir, username, password)
             print_success("Download process completed!")
         else:
             print_warning("Download cancelled.")
-            
+
     except KeyboardInterrupt:
         print_warning("\nProcess aborted by user.")
         sys.exit(0)

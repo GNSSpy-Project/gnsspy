@@ -22,3 +22,6 @@ __all__ = [
     "interpolate_ionosphere",
     "compute_ionospheric_delay",
 ]
+
+from gnsspy.atmosphere.ionosphere import interpolate_vtec
+__all__ += ["interpolate_vtec"]

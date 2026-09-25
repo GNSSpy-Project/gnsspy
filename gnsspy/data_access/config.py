@@ -12,7 +12,6 @@ IONOSPHERE_URL = "https://cddis.nasa.gov/archive/gnss/products/ionex"
 NETRC_FILE = os.path.expanduser("~/.netrc")
 
 
-
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = PACKAGE_ROOT.parent
 DEFAULT_OUTPUT_DIR = str(PROJECT_ROOT / "data")
@@ -102,6 +101,6 @@ IONOSPHERE_TYPES = {
     'predicted': {
         'prefix': 'igpg',
         'delay_days': 0,
-        'description': 'IGS Predicted (1-2 days ahead)'
+        'description': 'Legacy igpg candidate; explicit request only, never an auto fallback'
     }
 }
