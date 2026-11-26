@@ -334,8 +334,7 @@ def read_obsFile_v3(obsFileName):
                                     month = int(epoch_month),
                                     day = int(epoch_day),
                                     hour = int(epoch_hour),
-                                    minute = int(epoch_minute),
-                                    second = int(float(epoch_second)))
+                                    minute = int(epoch_minute)) + datetime.timedelta(seconds = float(epoch_second))
             epochList.append(epoch)
             del obsLines[0]
 
@@ -381,8 +380,7 @@ def read_obsFile_v3(obsFileName):
     if len(epochList) == 1:
         interval = 30
     else:
-        interval = epochList[1] - epochList[0]
-        interval = interval.seconds
+        interval = (epochList[1] - epochList[0]).total_seconds()
     f.close()
 
     finish = time.time()
